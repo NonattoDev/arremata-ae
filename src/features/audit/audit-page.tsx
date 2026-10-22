@@ -19,10 +19,8 @@ export function Audit({ id }: { id: string }) {
   return (
     <Card>
       <Link href={`/lotes/${id}`}>Voltar ao lote</Link>
-      <Typography>TRANSPARÊNCIA, SEM PRECISAR DE LOGIN</Typography>
-      <Typography.Heading level={1}>
-        Histórico aberto. Confiança verificada.
-      </Typography.Heading>
+      <Typography>CONSULTA PÚBLICA</Typography>
+      <Typography.Heading level={1}>Auditoria do lote</Typography.Heading>
       <Typography.Paragraph>{data.title}</Typography.Paragraph>
       {error && <Notice>{error}</Notice>}
       <Card.Content className="flex min-w-0 flex-col gap-4">

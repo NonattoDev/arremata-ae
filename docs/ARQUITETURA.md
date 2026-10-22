@@ -55,3 +55,15 @@ Testes de domínio preservam as regras do PDF. O teste do adapter exercita Prism
 ## Interface HeroUI
 
 Todos os controles, textos, tabelas, avisos e estruturas visuais usam HeroUI 3, com sua aparência nativa. As únicas exceções autorizadas são Next/Image para obras, utilitários Tailwind para layout, espaçamento, dimensões e responsividade, e html/body no layout raiz do Next.js. Não adicionar CSS próprio, estilos inline ou outra biblioteca de componentes. Field centraliza o contrato TextField/Input: value e defaultValue pertencem ao TextField. RouterProvider integra links HeroUI ao App Router; I18nProvider define pt-BR.
+
+## Navegação
+
+- `/`: início com lotes ao vivo e atalhos conforme o perfil.
+- `/leiloes`: catálogo completo, busca e filtros de status.
+- `/lotes/[id]`: sala do lote; `/auditoria/[id]` e `/comprovante/[id]` continuam públicos.
+- `/entrar` e `/cadastro`: páginas separadas, com formulário reutilizável e Server Actions compartilhadas.
+- `/meus-lotes`, `/carteira` e `/novo-lote`: áreas existentes preservadas, com acesso conforme sessão/papel.
+
+Brand, RouteBreadcrumbs e AppShell compõem o cabeçalho e a navegação comum. Breadcrumbs orientam páginas internas sem substituir o roteamento por arquivos do Next.js. A marca usa Next/Image como imagem de identidade solicitada pelo proprietário; o restante mantém HeroUI e utilitários somente de layout.
+
+A navbar fica em SiteNavbar, separada do conteúdo, com margens laterais e posição sticky. O pedido de glass autoriza nela utilitários Tailwind de transparência, borda, sombra e backdrop blur, preservando as cores do tema HeroUI. globals.css continua apenas com imports.

@@ -65,7 +65,7 @@ export function LotRoom({ id }: { id: string }) {
     : lot.initial;
   return (
     <Card>
-      <Link href="/">Explorar leilões</Link>
+      <Link href="/leiloes">Explorar leilões</Link>
       {resource.error && (
         <Notice>Atualização interrompida: {resource.error}</Notice>
       )}
@@ -83,7 +83,7 @@ export function LotRoom({ id }: { id: string }) {
               Ver origem
             </Link>
           </Card.Content>
-          <Card.Title>Uma obra, muitos detalhes.</Card.Title>
+          <Card.Title>Dados da obra</Card.Title>
           <Card.Content className="flex min-w-0 flex-col gap-4">
             <Card.Content className="flex min-w-0 flex-col gap-4">
               <Typography>Artista</Typography>
@@ -126,12 +126,10 @@ export function LotRoom({ id }: { id: string }) {
                     : "Disputa finalizada"}
               </Typography>
               {["live", "scheduled"].includes(lot.status) && (
-                <Typography>
-                  <Countdown
-                    end={lot.status === "scheduled" ? lot.startsAt : lot.endsAt}
-                    serverTime={lot.serverTime}
-                  />
-                </Typography>
+                <Countdown
+                  end={lot.status === "scheduled" ? lot.startsAt : lot.endsAt}
+                  serverTime={lot.serverTime}
+                />
               )}
             </Card.Content>
           </Card.Content>
@@ -203,7 +201,7 @@ export function LotRoom({ id }: { id: string }) {
       </Card.Content>
       <Card>
         <Card.Content className="flex min-w-0 flex-col gap-4">
-          <Card.Title>Cada lance conta.</Card.Title>
+          <Card.Title>Histórico de lances</Card.Title>
           <Typography>Histórico atualizado automaticamente</Typography>
         </Card.Content>
         <BidTable bids={lot.bids} />

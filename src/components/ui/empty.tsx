@@ -2,7 +2,7 @@
 import { EmptyState, Typography } from "@heroui/react";
 import type { ReactNode } from "react";
 export function Empty({
-  title = "Ainda não há lotes por aqui.",
+  title = "Nenhum lote disponível.",
   children,
 }: {
   title?: string;
@@ -11,9 +11,7 @@ export function Empty({
   return (
     <EmptyState>
       <Typography.Heading level={3}>{title}</Typography.Heading>
-      <Typography.Paragraph>
-        {children || "Volte em breve para descobrir novas obras."}
-      </Typography.Paragraph>
+      {children && <Typography.Paragraph>{children}</Typography.Paragraph>}
     </EmptyState>
   );
 }

@@ -72,6 +72,15 @@ test("rejects seller bidding and cross-owner cancellation", async () => {
   const id = await lot();
   await assert.rejects(service.bid(seller, id, 10000), /licitante/i);
   await assert.rejects(service.cancel(alice, id), /leiloeiro|permissão/i);
+  const otherSeller = await service.createUser(
+    `other-seller-${Date.now()}@test.local`,
+    "Outro vendedor",
+    "hash",
+    "seller",
+  );
+  await assert.rejects(service.cancel(otherSeller, id), /permissão/i);
+  assert.equal((await service.listLots(otherSeller, "seller")).length, 0);
+  assert.equal((await service.getLot(id)).status, "live");
 });
 test("validates minimum, funds, leader and immediately releases previous leader balance", async () => {
   const id = await lot();

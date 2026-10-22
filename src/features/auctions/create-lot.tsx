@@ -85,9 +85,7 @@ export function CreateLot({ user }: { user: User }) {
     <Card>
       <Card.Header>
         <Link href="/meus-lotes">Meus lotes</Link>
-        <Typography.Heading level={1}>
-          Coloque uma história em disputa.
-        </Typography.Heading>
+        <Typography.Heading level={1}>Criar lote</Typography.Heading>
         <Card.Description>
           Escolha uma obra em domínio público do Cleveland Museum of Art.
         </Card.Description>

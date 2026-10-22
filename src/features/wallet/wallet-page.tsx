@@ -33,7 +33,7 @@ export function WalletPage({ user }: { user: User }) {
         }),
       );
       form.reset();
-      setSuccess("Saldo simulado adicionado à sua carteira.");
+      setSuccess("Saldo adicionado.");
       await resource.refresh();
     } catch (e) {
       setError((e as Error).message);
@@ -43,16 +43,13 @@ export function WalletPage({ user }: { user: User }) {
   };
   return (
     <Card>
-      <Typography>TUDO SOB CONTROLE</Typography>
       <Typography.Heading level={1}>
-        {user.role === "seller"
-          ? "Seus recebimentos."
-          : "Sua próxima conquista começa aqui."}
+        {user.role === "seller" ? "Recebimentos" : "Minha carteira"}
       </Typography.Heading>
       <Typography.Paragraph>
         {user.role === "seller"
           ? "Valores creditados pelos lotes arrematados."
-          : "Adicione saldo simulado e entre na disputa pelas suas obras favoritas."}
+          : "Consulte seu saldo e os valores reservados em lances."}
       </Typography.Paragraph>
       {resource.error && <Notice>{resource.error}</Notice>}
       <Card.Content className="grid min-w-0 gap-4 md:grid-cols-3">
@@ -72,7 +69,7 @@ export function WalletPage({ user }: { user: User }) {
       <Card.Content className="grid min-w-0 gap-6 lg:grid-cols-2">
         {user.role === "bidder" && (
           <Card.Content className="flex min-w-0 flex-col gap-4">
-            <Card.Title>Um impulso para o próximo lance.</Card.Title>
+            <Card.Title>Adicionar saldo</Card.Title>
             <Typography.Paragraph>
               Depósito simulado. Nenhuma cobrança será realizada.
             </Typography.Paragraph>
@@ -96,7 +93,7 @@ export function WalletPage({ user }: { user: User }) {
           </Card.Content>
         )}
         <Card.Content className="flex min-w-0 flex-col gap-4">
-          <Card.Title>Seu saldo acompanha a disputa.</Card.Title>
+          <Card.Title>Como funciona a reserva de saldo</Card.Title>
           <Typography.Paragraph>
             Ao liderar um lote, o valor do lance fica comprometido. Se outra
             pessoa superar você, ele volta imediatamente ao disponível.

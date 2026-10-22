@@ -6,8 +6,8 @@ import { Empty } from "@/components/ui/empty";
 export function BidTable({ bids }: { bids: Bid[] }) {
   if (!bids.length)
     return (
-      <Empty title="A história deste lote está começando.">
-        Seja a primeira pessoa a dar um lance.
+      <Empty title="Nenhum lance registrado.">
+        Os lances aceitos aparecerão nesta lista.
       </Empty>
     );
   return (

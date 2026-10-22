@@ -4,7 +4,7 @@ export function Loading() {
   return (
     <EmptyState role="status">
       <Spinner />
-      <Typography>Preparando tudo por aqui…</Typography>
+      <Typography>Carregando…</Typography>
     </EmptyState>
   );
 }

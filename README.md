@@ -113,9 +113,10 @@ Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplic
 - `src/server/database`: adapters Prisma/PostgreSQL e PGlite.
 - `src/server/security.ts`: senhas/sessões/limites; `catalog.ts`: API e imagens.
 - `prisma/schema.prisma`: modelos e relações; `prisma/migrations`: SQL versionado.
-- Interface com componentes e aparência nativa HeroUI. `globals.css` importa apenas Tailwind e HeroUI; utilitários limitados a layout/responsividade. Obras usam `ArtworkImage` com Next/Image.
+- Interface com componentes e aparência nativa HeroUI. `globals.css` importa apenas Tailwind e HeroUI; utilitários de layout/responsividade e exceção autorizada de transparência, borda, sombra e blur na navbar glass. Obras usam `ArtworkImage` com Next/Image.
 - `docs/ARQUITETURA.md`: responsabilidades, limites e decisões.
 - `docs/REQUISITOS.md`: rastreabilidade do PDF.
+- `docs/CHECKLIST-DESAFIO.md`: checklist obrigatório/opcional com evidências e pendências de entrega.
 
 Desenvolvido com assistência do Codex para estrutura, código, testes, documentação e revisão. Foram conferidas regras contra o PDF, executadas verificações e corrigidos achados de revisão. Não se afirma revisão manual do candidato ainda não realizada: antes de enviar, Robson deve revisar/compreender a solução e ajustar o relato à participação real.
 

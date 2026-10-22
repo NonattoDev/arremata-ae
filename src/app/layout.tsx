@@ -3,9 +3,13 @@ import { SessionProvider } from "@/components/providers/session-provider";
 import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
-  title: "Arremata aê — Histórias que merecem um lance",
+  icons: {
+    icon: "/brand/arremata-symbol.png",
+    apple: "/brand/arremata-symbol.png",
+  },
+  title: "Arremata aê | Leilões de arte",
   description:
-    "Explore obras de arte, acompanhe leilões ao vivo e encontre sua próxima história. Projeto demonstrativo com saldo simulado.",
+    "Leilões de arte com consulta de lotes, lances ao vivo e histórico de arremates.",
 };
 export default function RootLayout({
   children,

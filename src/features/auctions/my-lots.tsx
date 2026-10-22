@@ -14,6 +14,7 @@ import { Notice } from "@/components/ui/notice";
 import { Loading } from "@/components/ui/loading";
 import { Empty } from "@/components/ui/empty";
 import { LotCard } from "@/components/auctions/lot-card";
+import { Share } from "@/components/ui/share";
 export function MyLots({ user }: { user: User }) {
   const { data: lots, error, refresh } = useResource<Lot[]>("mine", true);
   const [actionError, setActionError] = useState(""),
@@ -37,12 +38,10 @@ export function MyLots({ user }: { user: User }) {
           <Typography>
             {user.role === "seller"
               ? "PAINEL DO LEILOEIRO"
-              : "SUA COLEÇÃO DE HISTÓRIAS"}
+              : "MINHAS PARTICIPAÇÕES"}
           </Typography>
           <Typography.Heading level={1}>
-            {user.role === "seller"
-              ? "Seus lotes, de perto."
-              : "Meus arremates."}
+            {user.role === "seller" ? "Meus lotes" : "Meus arremates"}
           </Typography.Heading>
         </Card.Content>
         {user.role === "seller" && <Link href="/novo-lote">Criar lote</Link>}
@@ -50,13 +49,11 @@ export function MyLots({ user }: { user: User }) {
       {user.role === "seller" && (
         <Typography.Paragraph>
           Total arrematado:{" "}
-          <Typography>
-            {brl(
-              lots
-                ?.filter((l) => l.hasWinner)
-                .reduce((sum, l) => sum + l.currentAmount, 0) || 0,
-            )}
-          </Typography>
+          {brl(
+            lots
+              ?.filter((l) => l.hasWinner)
+              .reduce((sum, l) => sum + l.currentAmount, 0) || 0,
+          )}
         </Typography.Paragraph>
       )}
       {(error || actionError) && <Notice>{error || actionError}</Notice>}
@@ -69,9 +66,14 @@ export function MyLots({ user }: { user: User }) {
               <LotCard lot={l} />
               <Card.Content className="flex min-w-0 flex-col gap-4">
                 {l.hasWinner ? (
-                  <Link href={`/comprovante/${l.id}`}>
-                    {l.isLeader ? "Você arrematou! " : ""}Ver comprovante{" "}
-                  </Link>
+                  <>
+                    <Typography>
+                      {l.isLeader ? "Você arrematou por" : "Arrematado por"}{" "}
+                      {brl(l.currentAmount)}
+                    </Typography>
+                    <Link href={`/comprovante/${l.id}`}>Ver comprovante</Link>
+                    <Share path={`/comprovante/${l.id}`} />
+                  </>
                 ) : l.status === "closed" ? (
                   <Typography>Encerrado sem vencedor</Typography>
                 ) : l.isLeader ? (
@@ -97,8 +99,8 @@ export function MyLots({ user }: { user: User }) {
         <Empty
           title={
             user.role === "seller"
-              ? "Sua primeira obra merece um palco."
-              : "Sua coleção começa com um lance."
+              ? "Você ainda não publicou lotes."
+              : "Você ainda não participou de leilões."
           }
         >
           {user.role === "seller"

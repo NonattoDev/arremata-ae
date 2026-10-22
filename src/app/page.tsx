@@ -1,4 +1,4 @@
-import { Explore } from "@/features/auctions/explore";
+import { HomePage } from "@/features/home/home-page";
 export default function Page() {
-  return <Explore />;
+  return <HomePage />;
 }

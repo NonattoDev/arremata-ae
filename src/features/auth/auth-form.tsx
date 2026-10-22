@@ -10,6 +10,7 @@ import {
   Card,
   Form,
   Label,
+  Link,
   Radio,
   RadioGroup,
   Typography,
@@ -17,9 +18,14 @@ import {
 
 import { Notice } from "@/components/ui/notice";
 import { Field } from "@/components/ui/field";
-export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
-  const [register, setRegister] = useState(false),
-    [error, setError] = useState(""),
+export function Auth({
+  onLogin,
+  register = false,
+}: {
+  onLogin: () => Promise<void>;
+  register?: boolean;
+}) {
+  const [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const router = useRouter();
   const submit = async (e: FormEvent<HTMLFormElement>) => {
@@ -43,12 +49,12 @@ export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
     <Card className="mx-auto w-full max-w-lg">
       <Card.Header>
         <Typography.Heading level={1}>
-          {register ? "Crie sua conta." : "Bom te ver por aqui."}
+          {register ? "Criar conta" : "Entrar"}
         </Typography.Heading>
         <Card.Description>
           {register
-            ? "Escolha como você quer participar."
-            : "Entre para acompanhar suas próximas conquistas."}
+            ? "Cadastre-se como licitante ou leiloeiro."
+            : "Acesse sua conta com e-mail e senha."}
         </Card.Description>
       </Card.Header>
       <Card.Content className="flex min-w-0 flex-col gap-4">
@@ -109,19 +115,10 @@ export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
         </Form>
       </Card.Content>
       <Card.Footer className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="secondary"
-          onPress={() => {
-            setRegister(!register);
-            setError("");
-          }}
-        >
-          {register ? "Já tem conta? Entrar" : "Primeira vez aqui? Criar conta"}
-        </Button>
+        <Link href={register ? "/entrar" : "/cadastro"}>
+          {register ? "Já tem conta? Entrar" : "Não tem conta? Criar conta"}
+        </Link>
       </Card.Footer>
-      <Card.Description>
-        Ambiente demonstrativo. Depósitos e arremates são simulados.
-      </Card.Description>
     </Card>
   );
 }

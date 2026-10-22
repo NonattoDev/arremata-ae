@@ -24,9 +24,8 @@ export function Receipt({ id }: { id: string }) {
     <Card className="mx-auto w-full max-w-2xl">
       <Link href={`/lotes/${id}`}>Voltar ao lote</Link>
       <Card.Content className="flex min-w-0 flex-col gap-4">
-        <Typography>COMPROVANTE DE ARREMATE</Typography>
         <Typography.Heading level={1}>
-          Uma nova história foi arrematada.
+          Comprovante de arremate
         </Typography.Heading>
         <ArtworkImage src={data.item.image} alt={data.item.title} />
         <Card.Title>{data.item.title}</Card.Title>
@@ -48,8 +47,7 @@ export function Receipt({ id }: { id: string }) {
         <Share path={`/comprovante/${id}`} />
         <Link href={`/auditoria/${id}`}>Verificar histórico</Link>
         <Typography.Paragraph>
-          Comprovante demonstrativo. Não representa venda de obra física nem
-          transação com dinheiro real.
+          Registro de arremate com saldo simulado.
         </Typography.Paragraph>
       </Card.Content>
     </Card>

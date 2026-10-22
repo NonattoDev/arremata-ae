@@ -1,6 +1,5 @@
 "use client";
 import {
-  Alert,
   Card,
   Typography,
   SearchField,
@@ -32,30 +31,12 @@ export function Explore() {
   return (
     <Card>
       <Card.Header>
-        <Typography.Heading level={1}>
-          Dê seu lance. Leve uma história.
-        </Typography.Heading>
+        <Typography.Heading level={1}>Leilões de arte</Typography.Heading>
         <Card.Description>
-          Descubra obras que atravessam o tempo. Acompanhe cada lance e encontre
-          sua próxima conquista.
+          Consulte os lotes, confira os valores e acompanhe os lances.
         </Card.Description>
       </Card.Header>
-      <Card.Content className="flex min-w-0 flex-col gap-4">
-        <Alert status="default">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>Leilões demonstrativos</Alert.Title>
-            <Alert.Description>
-              Lances ao vivo, histórico verificável e saldo simulado. Sem
-              dinheiro real.
-            </Alert.Description>
-          </Alert.Content>
-        </Alert>
-      </Card.Content>
       <Card.Content id="leiloes" className="flex min-w-0 flex-col gap-6">
-        <Typography.Heading level={2}>
-          O próximo lance é seu.
-        </Typography.Heading>
         <SearchField value={query} onChange={setQuery}>
           <Label>Buscar obra ou artista</Label>
           <Input placeholder="Busque uma obra ou artista" />
@@ -97,12 +78,6 @@ export function Explore() {
           ))}
         </Tabs>
       </Card.Content>
-      <Card.Footer className="flex flex-wrap items-center gap-3">
-        <Typography.Paragraph>
-          Escolha sua obra, adicione saldo simulado e participe. Se vencer, seu
-          comprovante ficará disponível para compartilhar.
-        </Typography.Paragraph>
-      </Card.Footer>
     </Card>
   );
 }

@@ -62,3 +62,15 @@ Não interpretar “implementado” ou “teste local passou” como prova de fu
 - Repetir inspeção visual da versão HeroUI em viewport móvel e revisão final de todos os fluxos pelo candidato. A validação desktop/publicação acima não comprova revisão mobile completa.
 - Revisar decisões e relato de uso de IA; enviar o formulário somente por solicitação explícita.
 - A branch Neon validation-20261022 permanece isolada para inspeção, com suspensão após cinco minutos sem atividade; contém dados deliberadamente adulterados pelos testes e não está ligada à Vercel.
+
+## Auditoria do checklist — 22/10/2026
+
+- Releitura de todos os grupos obrigatórios no código, com rastreabilidade em CHECKLIST-DESAFIO.md.
+- 13 testes passaram, Prisma schema válido, TypeScript e build aprovados.
+- Novo teste simula indisponibilidade total de fetch: busca/importação falham com mensagem, mas lotes persistidos, sala, lance, auditoria, liquidação e comprovante continuam funcionando; imagem permanece armazenada.
+- Teste de propriedade reforçado com segundo leiloeiro: não cancela nem lista o lote alheio.
+- Smoke HTTP local: três logins, HttpOnly, origem, papéis, depósito, importação real, lances, posição, auditoria e imagem; lote 277d5c9f-18dd-4ab4-92b1-5013e6dfd2fa.
+- Fluxo HTTP local adicional: cadastro de vendedor sintético, login, sessão, catálogo, publicação, cancelamento sem lances, ocultação na vitrine e logout. Lote 2b80341a-d782-4310-8084-2750b2757bf8.
+- Painel exibe resultado do arremate e cópia do link do comprovante; botão conferido no navegador integrado.
+- Navegador detectou parágrafos aninhados no total do painel. Corrigido também o wrapper redundante do contador da sala; recarga/navegação não geraram novos erros de aninhamento.
+- Inspeção mobile da interface final ainda pendente; o navegador integrado disponível não expõe controle de viewport nesta sessão. Não usar inspeção desktop como prova de mobile.

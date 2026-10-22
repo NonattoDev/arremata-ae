@@ -1,0 +1,27 @@
+# Evidências da primeira implementação — 22/10/2026
+
+## Conferido localmente
+
+- TypeScript sem erros.
+- `npm run check` concluído: TypeScript, 10 testes e build de produção Next.js. `npm audit --omit=dev`: nenhuma vulnerabilidade reportada.
+- 10 testes de integração SQL/PGlite passando: papéis, valores/horários, reserva/liberação, líder impedido de cobrir lance, disputas simultâneas, carteira entre lotes, anti-sniping, liquidação única, cancelamento, privacidade e adulteração (edição, exclusão intermediária/final e inserção).
+- Regressão adicional: recebimento acima do limite de depósitos não bloqueia liquidação nem listagem.
+- Importação real da API Cleveland Museum of Art com imagem persistida no banco.
+- Smoke HTTP (`npx tsx --env-file=.env.local scripts/smoke.ts`, exige servidor local): login real, HttpOnly, bloqueio de origem externa, autorização por papel, depósito, criação por API, lances, posição após ser superado, auditoria pública sem e-mails e imagem própria.
+- Navegador desktop: login de Ana, primeiro lance de R$ 100; sessão independente de Bruno, lance de R$ 110. Tela de Ana passou a “Você foi superado. Sua posição: 2º.” sem recarregar; reserva foi liberada.
+- Lote curto do smoke HTTP encerrado pelo fluxo oportunista; comprovante público retornou HTTP 200 com valor de R$ 110 e alias do vencedor. Isso não comprova o agendador da Vercel.
+- Inspeção visual da home desktop, sala e carteira em viewport 390 × 844. Sala sem overflow horizontal (scrollWidth 375 no viewport 390, incluindo scrollbar do navegador).
+- Revisão independente encontrou três P2 (seleção antiga, resposta fora de ordem, teto de recebimentos). Corrigidos e relidos pelo revisor, sem novo achado nas correções.
+
+As capturas locais ficam em `output/playwright/`, ignoradas pelo Git para não publicar estados de sessões de teste.
+
+## Pendências para entrega final
+
+- PostgreSQL hospedado: aplicar esquema/seed e testar transações concorrentes por conexões independentes. PGlite usa fila local e não exercita o advisory lock distribuído.
+- Vercel: vincular GitHub pessoal, variáveis, deploy READY e URL pública acessível.
+- Confirmar plano que permita cron por minuto; comprovar liquidação com navegador fechado e agendador real, inclusive reexecução idempotente.
+- Repetir fluxo completo no deploy: cadastro, ambos os papéis, publicação/cancelamento, lances, carteira, auditoria e comprovante público.
+- Revalidar API indisponível em produção e todos os tamanhos de tela relevantes.
+- Revisão final do candidato, entendimento das decisões, preenchimento do relato de IA e submissão explícita do formulário.
+
+Não interpretar “implementado” ou “teste local passou” como prova de funcionamento em produção ou de aprovação no processo seletivo.

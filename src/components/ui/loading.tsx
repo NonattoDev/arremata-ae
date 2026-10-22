@@ -1,12 +1,10 @@
 "use client";
-
-import { Spinner } from "@heroui/react";
-
+import { EmptyState, Spinner, Typography } from "@heroui/react";
 export function Loading() {
   return (
-    <div className="loading">
+    <EmptyState role="status">
       <Spinner />
-      <span>Preparando tudo por aqui…</span>
-    </div>
+      <Typography>Preparando tudo por aqui…</Typography>
+    </EmptyState>
   );
 }

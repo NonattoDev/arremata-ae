@@ -4,15 +4,13 @@ import { depositAction } from "@/server/actions/wallet";
 
 import { useState, type FormEvent } from "react";
 
-import { Button } from "@heroui/react";
-import { ShieldCheck, Wallet, Plus } from "lucide-react";
-
 import type { User } from "@/types/auction";
 import { brl } from "@/lib/format";
 
 import { useResource } from "@/hooks/use-resource";
 import { Notice } from "@/components/ui/notice";
 import { Field } from "@/components/ui/field";
+import { Button, Card, Form, Typography } from "@heroui/react";
 export function WalletPage({ user }: { user: User }) {
   const resource = useResource<{
     total: number;
@@ -44,43 +42,41 @@ export function WalletPage({ user }: { user: User }) {
     }
   };
   return (
-    <section className="page">
-      <span className="eyebrow">TUDO SOB CONTROLE</span>
-      <h1>
+    <Card>
+      <Typography>TUDO SOB CONTROLE</Typography>
+      <Typography.Heading level={1}>
         {user.role === "seller"
           ? "Seus recebimentos."
           : "Sua próxima conquista começa aqui."}
-      </h1>
-      <p className="lead">
+      </Typography.Heading>
+      <Typography.Paragraph>
         {user.role === "seller"
           ? "Valores creditados pelos lotes arrematados."
           : "Adicione saldo simulado e entre na disputa pelas suas obras favoritas."}
-      </p>
+      </Typography.Paragraph>
       {resource.error && <Notice>{resource.error}</Notice>}
-      <div className="balance-grid">
+      <Card.Content className="grid min-w-0 gap-4 md:grid-cols-3">
         {[
           ["Saldo total", "total"],
           ["Saldo comprometido", "committed"],
           ["Saldo disponível", "available"],
         ].map(([label, key]) => (
-          <div
-            className={`balance-card ${key === "available" ? "highlight" : ""}`}
-            key={key}
-          >
-            <Wallet size={22} />
-            <span>{label}</span>
-            <strong>
+          <Card.Content key={key}>
+            <Typography>{label}</Typography>
+            <Typography>
               {resource.data ? brl(resource.data[key as "total"]) : "—"}
-            </strong>
-          </div>
+            </Typography>
+          </Card.Content>
         ))}
-      </div>
-      <div className="wallet-bottom">
+      </Card.Content>
+      <Card.Content className="grid min-w-0 gap-6 lg:grid-cols-2">
         {user.role === "bidder" && (
-          <div className="panel">
-            <h2>Um impulso para o próximo lance.</h2>
-            <p>Depósito simulado. Nenhuma cobrança será realizada.</p>
-            <form onSubmit={deposit}>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Card.Title>Um impulso para o próximo lance.</Card.Title>
+            <Typography.Paragraph>
+              Depósito simulado. Nenhuma cobrança será realizada.
+            </Typography.Paragraph>
+            <Form onSubmit={deposit} className="flex flex-col gap-4">
               <Field
                 name="amount"
                 label="Valor do depósito (R$)"
@@ -91,28 +87,26 @@ export function WalletPage({ user }: { user: User }) {
                 placeholder="500,00"
                 required
               />
-              <Button type="submit" className="orange-button" isPending={busy}>
-                <Plus size={18} />
+              <Button type="submit" isPending={busy}>
                 Adicionar saldo
               </Button>
-            </form>
+            </Form>
             {error && <Notice>{error}</Notice>}
             {success && <Notice good>{success}</Notice>}
-          </div>
+          </Card.Content>
         )}
-        <div className="wallet-explanation">
-          <ShieldCheck size={30} />
-          <h2>Seu saldo acompanha a disputa.</h2>
-          <p>
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Card.Title>Seu saldo acompanha a disputa.</Card.Title>
+          <Typography.Paragraph>
             Ao liderar um lote, o valor do lance fica comprometido. Se outra
             pessoa superar você, ele volta imediatamente ao disponível.
-          </p>
-          <p>
+          </Typography.Paragraph>
+          <Typography.Paragraph>
             Quando o lote encerra, somente o vencedor é debitado. O leiloeiro
             recebe o mesmo valor.
-          </p>
-        </div>
-      </div>
-    </section>
+          </Typography.Paragraph>
+        </Card.Content>
+      </Card.Content>
+    </Card>
   );
 }

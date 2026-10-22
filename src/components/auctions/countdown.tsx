@@ -1,4 +1,5 @@
 "use client";
+import { Typography } from "@heroui/react";
 import { useEffect, useState } from "react";
 
 export function Countdown({
@@ -16,20 +17,20 @@ export function Countdown({
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, [serverTime]);
-  if (now === null) return <span>—</span>;
+  if (now === null) return <Typography>—</Typography>;
   const seconds = Math.max(
     0,
     Math.floor((new Date(end).getTime() - now) / 1000),
   );
-  if (seconds === 0) return <span>Encerrando</span>;
+  if (seconds === 0) return <Typography>Encerrando</Typography>;
   const days = Math.floor(seconds / 86400),
     hours = Math.floor(seconds / 3600) % 24,
     minutes = Math.floor(seconds / 60) % 60;
   return (
-    <span>
+    <Typography>
       {days ? `${days}d ` : ""}
       {hours ? `${hours}h ` : ""}
       {minutes}m {!days && !hours ? `${seconds % 60}s` : ""}
-    </span>
+    </Typography>
   );
 }

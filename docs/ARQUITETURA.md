@@ -24,7 +24,7 @@ As Actions recebem entradas não confiáveis (`unknown`). Os comandos validam co
 | `server/auction.ts`    | Coordenação das operações atômicas de mercado.                                     |
 | `server/database`      | Transações e acesso ao banco por adapter.                                          |
 | `prisma`               | Schema, relações, índices e migrations versionadas.                                |
-| `styles`               | Estilos por área e breakpoints; globals somente importa.                           |
+| `app/globals.css`      | Somente imports de Tailwind e HeroUI; nenhum CSS próprio.                          |
 
 Componentes não conhecem SQL, cookies ou segredos. O domínio não conhece JSX nem APIs do Next. Não criar um arquivo genérico para acumular telas ou helpers sem relação. Ao adicionar funcionalidade, manter arquivos focados e extrair responsabilidades antes de aumentar a complexidade; quantidade de linhas é um sinal, não um motivo para fragmentação artificial.
 
@@ -51,3 +51,7 @@ A migration inicial é idempotente para incorporar a base desta primeira versão
 ## Verificação e limites
 
 Testes de domínio preservam as regras do PDF. O teste do adapter exercita Prisma/pg através de conexão TCP contra PGlite, com rollback e liquidação idempotente. Isso valida integração de tipos/protocolo/transações, mas não reproduz concorrência multi-instância de PostgreSQL hospedado. Essa prova e o deploy Vercel continuam pendentes.
+
+## Interface HeroUI
+
+Todos os controles, textos, tabelas, avisos e estruturas visuais usam HeroUI 3, com sua aparência nativa. As únicas exceções autorizadas são Next/Image para obras, utilitários Tailwind para layout, espaçamento, dimensões e responsividade, e html/body no layout raiz do Next.js. Não adicionar CSS próprio, estilos inline ou outra biblioteca de componentes. Field centraliza o contrato TextField/Input: value e defaultValue pertencem ao TextField. RouterProvider integra links HeroUI ao App Router; I18nProvider define pt-BR.

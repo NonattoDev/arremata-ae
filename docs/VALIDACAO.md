@@ -35,3 +35,12 @@ Não interpretar “implementado” ou “teste local passou” como prova de fu
 - Navegador integrado: login Ana por Action; depósito simulado de R$1 (saldo 5010 → 5011); lance R$120 aceito, liderança e saldo disponível R$4891. Captura local em output/playwright/server-action-wallet.png (ignorada no Git).
 - Revisão independente sem achados P1/P2 nas Actions, permissões, adapter e rotas/sessão.
 - Vercel, PostgreSQL hospedado e cron sem navegador permanecem pendentes.
+
+## Interface nativa HeroUI — 22/10/2026
+
+- Removidos os 13 arquivos de CSS próprio; globals contém somente os imports de Tailwind/HeroUI. Componentes visuais, formulários, tabelas, textos e navegação usam HeroUI 3.
+- Exceções aprovadas: Next/Image para obras, Tailwind somente para layout/espaçamento/dimensões/responsividade e html/body no layout raiz.
+- Navegador integrado: logout/login do leiloeiro, depósito simulado de R$1 (saldo Ana 5011 → 5012), catálogo Monet, seleção de obra habilitando publicação e valores iniciais 100/10 preservados.
+- Revisão independente identificou defaultValue no nível incorreto do TextField. Corrigido e revisado novamente sem novos achados P1/P2.
+- TypeScript, 12 testes e build de produção passaram; npm audit após remoção de lucide-react reportou zero vulnerabilidades.
+- A inspeção anterior em viewport móvel não comprova esta nova interface; repetir no ambiente final. Deploy Vercel e validação com PostgreSQL hospedado continuam pendentes.

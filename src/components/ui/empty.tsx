@@ -1,8 +1,6 @@
 "use client";
-import { type ReactNode } from "react";
-
-import { Gavel } from "lucide-react";
-
+import { EmptyState, Typography } from "@heroui/react";
+import type { ReactNode } from "react";
 export function Empty({
   title = "Ainda não há lotes por aqui.",
   children,
@@ -11,10 +9,11 @@ export function Empty({
   children?: ReactNode;
 }) {
   return (
-    <div className="empty">
-      <Gavel size={32} />
-      <h3>{title}</h3>
-      <p>{children || "Volte em breve para descobrir novas obras."}</p>
-    </div>
+    <EmptyState>
+      <Typography.Heading level={3}>{title}</Typography.Heading>
+      <Typography.Paragraph>
+        {children || "Volte em breve para descobrir novas obras."}
+      </Typography.Paragraph>
+    </EmptyState>
   );
 }

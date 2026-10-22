@@ -1,12 +1,9 @@
 "use client";
+import { Button, Card, Link, Typography } from "@heroui/react";
 import { runAction } from "@/lib/run-action";
 import { cancelLotAction } from "@/server/actions/lots";
 
 import { useState } from "react";
-import Link from "next/link";
-
-import { Button } from "@heroui/react";
-import { ArrowUpRight, Plus } from "lucide-react";
 
 import type { User } from "@/types/auction";
 import type { Lot } from "@/types/auction";
@@ -34,57 +31,51 @@ export function MyLots({ user }: { user: User }) {
     }
   };
   return (
-    <section className="page">
-      <div className="section-heading">
-        <div>
-          <span className="eyebrow">
+    <Card>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Typography>
             {user.role === "seller"
               ? "PAINEL DO LEILOEIRO"
               : "SUA COLEÇÃO DE HISTÓRIAS"}
-          </span>
-          <h1>
+          </Typography>
+          <Typography.Heading level={1}>
             {user.role === "seller"
               ? "Seus lotes, de perto."
               : "Meus arremates."}
-          </h1>
-        </div>
-        {user.role === "seller" && (
-          <Link href="/novo-lote" className="button-link orange-button">
-            <Plus size={18} />
-            Criar lote
-          </Link>
-        )}
-      </div>
+          </Typography.Heading>
+        </Card.Content>
+        {user.role === "seller" && <Link href="/novo-lote">Criar lote</Link>}
+      </Card.Content>
       {user.role === "seller" && (
-        <p className="lead">
+        <Typography.Paragraph>
           Total arrematado:{" "}
-          <strong>
+          <Typography>
             {brl(
               lots
                 ?.filter((l) => l.hasWinner)
                 .reduce((sum, l) => sum + l.currentAmount, 0) || 0,
             )}
-          </strong>
-        </p>
+          </Typography>
+        </Typography.Paragraph>
       )}
       {(error || actionError) && <Notice>{error || actionError}</Notice>}
       {!lots && !error ? (
         <Loading />
       ) : lots?.length ? (
-        <div className="lot-grid">
+        <Card.Content className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {lots.map((l) => (
-            <div key={l.id}>
+            <Card.Content key={l.id}>
               <LotCard lot={l} />
-              <div className="lot-actions">
+              <Card.Content className="flex min-w-0 flex-col gap-4">
                 {l.hasWinner ? (
                   <Link href={`/comprovante/${l.id}`}>
                     {l.isLeader ? "Você arrematou! " : ""}Ver comprovante{" "}
-                    <ArrowUpRight size={14} />
                   </Link>
                 ) : l.status === "closed" ? (
-                  <span>Encerrado sem vencedor</span>
+                  <Typography>Encerrado sem vencedor</Typography>
                 ) : l.isLeader ? (
-                  <span className="winning">Você está ganhando</span>
+                  <Typography>Você está ganhando</Typography>
                 ) : null}
                 {user.role === "seller" &&
                   ["live", "scheduled"].includes(l.status) &&
@@ -98,10 +89,10 @@ export function MyLots({ user }: { user: User }) {
                       Cancelar lote
                     </Button>
                   )}
-              </div>
-            </div>
+              </Card.Content>
+            </Card.Content>
           ))}
-        </div>
+        </Card.Content>
       ) : (
         <Empty
           title={
@@ -115,6 +106,6 @@ export function MyLots({ user }: { user: User }) {
             : "Os lotes em que você participar aparecerão aqui."}
         </Empty>
       )}
-    </section>
+    </Card>
   );
 }

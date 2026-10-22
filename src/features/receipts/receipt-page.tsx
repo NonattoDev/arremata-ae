@@ -1,8 +1,7 @@
 "use client";
+import { ArtworkImage } from "@/components/auctions/artwork-image";
+import { Card, Link, Typography } from "@heroui/react";
 
-import Link from "next/link";
-
-import { ArrowUpRight, ShieldCheck, ArrowLeft } from "lucide-react";
 import type { Item } from "@/server/auction";
 
 import { brl } from "@/lib/format";
@@ -20,50 +19,39 @@ export function Receipt({ id }: { id: string }) {
     checkpoint: string;
   }>(`receipts/${id}`);
   if (!data)
-    return (
-      <section className="page">
-        {error ? <Notice>{error}</Notice> : <Loading />}
-      </section>
-    );
+    return <Card>{error ? <Notice>{error}</Notice> : <Loading />}</Card>;
   return (
-    <section className="page narrow">
-      <Link href={`/lotes/${id}`} className="back">
-        <ArrowLeft size={16} /> Voltar ao lote
-      </Link>
-      <div className="panel receipt">
-        <ShieldCheck size={40} />
-        <span className="eyebrow">COMPROVANTE DE ARREMATE</span>
-        <h1>
-          Uma nova história
-          <br />
-          foi arrematada.
-        </h1>
-        <img src={data.item.image} alt={data.item.title} />
-        <h2>{data.item.title}</h2>
-        <p>{data.item.artist}</p>
-        <dl className="details">
-          <div>
-            <dt>Arrematante</dt>
-            <dd>{data.winner}</dd>
-          </div>
-          <div>
-            <dt>Valor</dt>
-            <dd>{brl(data.amount)}</dd>
-          </div>
-          <div>
-            <dt>Liquidado em</dt>
-            <dd>{date(data.settledAt)}</dd>
-          </div>
-        </dl>
+    <Card className="mx-auto w-full max-w-2xl">
+      <Link href={`/lotes/${id}`}>Voltar ao lote</Link>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Typography>COMPROVANTE DE ARREMATE</Typography>
+        <Typography.Heading level={1}>
+          Uma nova história foi arrematada.
+        </Typography.Heading>
+        <ArtworkImage src={data.item.image} alt={data.item.title} />
+        <Card.Title>{data.item.title}</Card.Title>
+        <Typography.Paragraph>{data.item.artist}</Typography.Paragraph>
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Typography>Arrematante</Typography>
+            <Typography>{data.winner}</Typography>
+          </Card.Content>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Typography>Valor</Typography>
+            <Typography>{brl(data.amount)}</Typography>
+          </Card.Content>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Typography>Liquidado em</Typography>
+            <Typography>{date(data.settledAt)}</Typography>
+          </Card.Content>
+        </Card.Content>
         <Share path={`/comprovante/${id}`} />
-        <Link className="audit-link" href={`/auditoria/${id}`}>
-          Verificar histórico <ArrowUpRight size={16} />
-        </Link>
-        <p className="fine-print">
+        <Link href={`/auditoria/${id}`}>Verificar histórico</Link>
+        <Typography.Paragraph>
           Comprovante demonstrativo. Não representa venda de obra física nem
           transação com dinheiro real.
-        </p>
-      </div>
-    </section>
+        </Typography.Paragraph>
+      </Card.Content>
+    </Card>
   );
 }

@@ -111,7 +111,7 @@ Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre
 - `src/server/database`: adapters Prisma/PostgreSQL e PGlite.
 - `src/server/security.ts`: senhas/sessões/limites; `catalog.ts`: API e imagens.
 - `prisma/schema.prisma`: modelos e relações; `prisma/migrations`: SQL versionado.
-- `src/styles`: estilos separados por funcionalidade e viewport.
+- Interface com componentes e aparência nativa HeroUI. `globals.css` importa apenas Tailwind e HeroUI; utilitários limitados a layout/responsividade. Obras usam `ArtworkImage` com Next/Image.
 - `docs/ARQUITETURA.md`: responsabilidades, limites e decisões.
 - `docs/REQUISITOS.md`: rastreabilidade do PDF.
 

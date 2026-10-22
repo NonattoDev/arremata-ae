@@ -1,12 +1,24 @@
 "use client";
+import { ArtworkImage } from "@/components/auctions/artwork-image";
 import { runAction } from "@/lib/run-action";
 import { createLotAction } from "@/server/actions/lots";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
-import { Button } from "@heroui/react";
-import { ArrowUpRight, Search, Check, ArrowLeft } from "lucide-react";
+import {
+  Button,
+  Card,
+  Description,
+  Form,
+  Label,
+  Link,
+  Radio,
+  RadioGroup,
+  SearchField,
+  Input,
+  Typography,
+} from "@heroui/react";
 
 import type { User } from "@/types/auction";
 import { api } from "@/lib/api";
@@ -68,61 +80,60 @@ export function CreateLot({ user }: { user: User }) {
     }
   };
   if (user.role !== "seller")
-    return (
-      <section className="page">
-        <Notice>Apenas leiloeiros podem criar lotes.</Notice>
-      </section>
-    );
+    return <Notice>Apenas leiloeiros podem criar lotes.</Notice>;
   return (
-    <section className="page">
-      <Link href="/meus-lotes" className="back">
-        <ArrowLeft size={16} /> Meus lotes
-      </Link>
-      <span className="eyebrow">UM NOVO ENCONTRO COM A ARTE</span>
-      <h1>Coloque uma história em disputa.</h1>
-      <p className="lead">
-        Escolha uma obra em domínio público do Cleveland Museum of Art.
-      </p>
-      <form onSubmit={search} className="catalog-search">
-        <label className="search-box">
-          <Search size={18} />
-          <input
-            aria-label="Buscar no catálogo"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Nome da obra ou artista"
-            maxLength={80}
-          />
-        </label>
-        <Button type="submit" className="dark-button" isPending={searching}>
-          Buscar obras
-        </Button>
-      </form>
+    <Card>
+      <Card.Header>
+        <Link href="/meus-lotes">Meus lotes</Link>
+        <Typography.Heading level={1}>
+          Coloque uma história em disputa.
+        </Typography.Heading>
+        <Card.Description>
+          Escolha uma obra em domínio público do Cleveland Museum of Art.
+        </Card.Description>
+      </Card.Header>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Form onSubmit={search} className="flex flex-col gap-4">
+          <SearchField value={query} onChange={setQuery} maxLength={80}>
+            <Label>Buscar no catálogo</Label>
+            <Input placeholder="Nome da obra ou artista" />
+          </SearchField>
+          <Button type="submit" isPending={searching}>
+            Buscar obras
+          </Button>
+        </Form>
+      </Card.Content>
       {error && <Notice>{error}</Notice>}
-      <div className="import-grid">
-        {results.map((r) => (
-          <button
-            type="button"
-            aria-pressed={selected === r.id}
-            className={selected === r.id ? "import-card chosen" : "import-card"}
-            key={r.id}
-            onClick={() => setSelected(r.id)}
-          >
-            <img src={r.image} alt={r.title} />
-            <strong>{r.title}</strong>
-            <span>{r.artist}</span>
-            {selected === r.id && (
-              <span className="chosen-label">
-                <Check size={14} />
-                Selecionada
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-      <form onSubmit={submit} className="panel lot-form">
-        <h2>Defina as regras do lote.</h2>
-        <div className="form-grid">
+      {results.length > 0 && (
+        <RadioGroup
+          aria-label="Escolha uma obra"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+          value={selected}
+          onChange={setSelected}
+        >
+          {results.map((r) => (
+            <Card key={r.id}>
+              <Card.Content className="flex min-w-0 flex-col gap-4">
+                <ArtworkImage src={r.image} alt={r.title} compact />
+                <Radio value={r.id}>
+                  <Radio.Control>
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  <Radio.Content>
+                    <Label>{r.title}</Label>
+                    <Description>{r.artist}</Description>
+                  </Radio.Content>
+                </Radio>
+              </Card.Content>
+            </Card>
+          ))}
+        </RadioGroup>
+      )}
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Form onSubmit={submit} className="flex flex-col gap-4">
+          <Typography.Heading level={2}>
+            Defina as regras do lote.
+          </Typography.Heading>
           <Field
             name="initial"
             label="Lance inicial (R$)"
@@ -155,21 +166,16 @@ export function CreateLot({ user }: { user: User }) {
             type="datetime-local"
             required
           />
-        </div>
-        <p className="fine-print">
-          Ao publicar, salvamos os dados e a imagem da obra. Seu lote continuará
-          disponível mesmo se a API do museu estiver fora do ar. Lotes com
-          lances não podem ser cancelados.
-        </p>
-        <Button
-          type="submit"
-          className="orange-button"
-          isDisabled={!selected}
-          isPending={busy}
-        >
-          Publicar lote <ArrowUpRight size={18} />
-        </Button>
-      </form>
-    </section>
+          <Typography.Paragraph size="sm">
+            Ao publicar, salvamos os dados e a imagem da obra. Seu lote continua
+            disponível mesmo se a API estiver fora do ar. Lotes com lances não
+            podem ser cancelados.
+          </Typography.Paragraph>
+          <Button type="submit" isDisabled={!selected} isPending={busy}>
+            Publicar lote
+          </Button>
+        </Form>
+      </Card.Content>
+    </Card>
   );
 }

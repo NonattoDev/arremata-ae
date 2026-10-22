@@ -1,8 +1,6 @@
 "use client";
-import { type ReactNode } from "react";
-
-import { Check, AlertCircle } from "lucide-react";
-
+import { Alert } from "@heroui/react";
+import type { ReactNode } from "react";
 export function Notice({
   children,
   good = false,
@@ -11,12 +9,14 @@ export function Notice({
   good?: boolean;
 }) {
   return (
-    <div
-      className={`notice ${good ? "good" : ""}`}
+    <Alert
+      status={good ? "success" : "danger"}
       role={good ? "status" : "alert"}
     >
-      {good ? <Check size={18} /> : <AlertCircle size={18} />}
-      <span>{children}</span>
-    </div>
+      <Alert.Indicator />
+      <Alert.Content>
+        <Alert.Description>{children}</Alert.Description>
+      </Alert.Content>
+    </Alert>
   );
 }

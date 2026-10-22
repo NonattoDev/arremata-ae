@@ -18,3 +18,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Não acumular funcionalidades sem relação em arquivos grandes. Separar responsabilidades antes de ampliar um módulo.
 - Ler `docs/ARQUITETURA.md` e `docs/REQUISITOS.md` antes de mudar arquitetura/regras.
 - Não abrir Chrome para testar; usar o navegador integrado já disponível no Codex.
+- Interface exclusivamente com componentes HeroUI e aparência nativa. Não criar CSS próprio, estilos inline, controles HTML ou componentes de outras bibliotecas.
+- Exceções expressamente autorizadas: Next/Image para as obras; Tailwind apenas para layout, espaçamento, dimensões e responsividade; html/body somente no layout raiz obrigatório do Next.js.
+- `globals.css` contém apenas imports de Tailwind e HeroUI. Não adicionar seletores, cores, fontes, sombras ou temas personalizados.

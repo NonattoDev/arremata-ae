@@ -5,8 +5,15 @@ import { registerAction, loginAction } from "@/server/actions/auth";
 import { useState, type FormEvent } from "react";
 
 import { useRouter } from "next/navigation";
-import { Button } from "@heroui/react";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import {
+  Button,
+  Card,
+  Form,
+  Label,
+  Radio,
+  RadioGroup,
+  Typography,
+} from "@heroui/react";
 
 import { Notice } from "@/components/ui/notice";
 import { Field } from "@/components/ui/field";
@@ -33,37 +40,19 @@ export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
     }
   };
   return (
-    <section className="page auth-page">
-      <div className="auth-story">
-        <span className="eyebrow">SEU PRÓXIMO CAPÍTULO</span>
-        <h1>
-          Grandes histórias
-          <br />
-          começam com
-          <br />
-          um <em>encontro.</em>
-        </h1>
-        <p>
-          Arte, descobertas e a emoção de um lance.
-          <br />
-          Tudo isso te espera aqui.
-        </p>
-        <ShieldCheck size={40} />
-        <p className="muted">
-          Seu histórico é verificável.
-          <br />
-          Seus dados pessoais ficam protegidos.
-        </p>
-      </div>
-      <div className="panel auth-panel">
-        <span className="eyebrow">BEM-VINDO AO ARREMATA AÊ</span>
-        <h2>{register ? "Crie sua conta." : "Bom te ver por aqui."}</h2>
-        <p>
+    <Card className="mx-auto w-full max-w-lg">
+      <Card.Header>
+        <Typography.Heading level={1}>
+          {register ? "Crie sua conta." : "Bom te ver por aqui."}
+        </Typography.Heading>
+        <Card.Description>
           {register
             ? "Escolha como você quer participar."
             : "Entre para acompanhar suas próximas conquistas."}
-        </p>
-        <form onSubmit={submit}>
+        </Card.Description>
+      </Card.Header>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Form onSubmit={submit} className="flex flex-col gap-4">
           {register && (
             <>
               <Field
@@ -74,13 +63,25 @@ export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
                 maxLength={80}
                 autoComplete="name"
               />
-              <label className="field">
-                <span>Quero participar como</span>
-                <select name="role">
-                  <option value="bidder">Licitante — dar lances</option>
-                  <option value="seller">Leiloeiro — publicar lotes</option>
-                </select>
-              </label>
+              <RadioGroup name="role" defaultValue="bidder" isRequired>
+                <Label>Quero participar como</Label>
+                <Radio value="bidder">
+                  <Radio.Control>
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  <Radio.Content>
+                    <Label>Licitante — dar lances</Label>
+                  </Radio.Content>
+                </Radio>
+                <Radio value="seller">
+                  <Radio.Control>
+                    <Radio.Indicator />
+                  </Radio.Control>
+                  <Radio.Content>
+                    <Label>Leiloeiro — publicar lotes</Label>
+                  </Radio.Content>
+                </Radio>
+              </RadioGroup>
             </>
           )}
           <Field
@@ -102,31 +103,25 @@ export function Auth({ onLogin }: { onLogin: () => Promise<void> }) {
             placeholder="Pelo menos 12 caracteres"
           />
           {error && <Notice>{error}</Notice>}
-          <Button
-            type="submit"
-            className="orange-button"
-            fullWidth
-            isPending={busy}
-          >
+          <Button type="submit" fullWidth isPending={busy}>
             {register ? "Criar minha conta" : "Entrar"}
-            <ArrowRight size={18} />
           </Button>
-        </form>
-        <p className="switch-auth">
-          {register ? "Já tem conta?" : "Primeira vez aqui?"}{" "}
-          <button
-            onClick={() => {
-              setRegister(!register);
-              setError("");
-            }}
-          >
-            {register ? "Entrar" : "Criar conta"}
-          </button>
-        </p>
-        <div className="demo-note">
-          Ambiente demonstrativo. Depósitos e arremates são simulados.
-        </div>
-      </div>
-    </section>
+        </Form>
+      </Card.Content>
+      <Card.Footer className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="secondary"
+          onPress={() => {
+            setRegister(!register);
+            setError("");
+          }}
+        >
+          {register ? "Já tem conta? Entrar" : "Primeira vez aqui? Criar conta"}
+        </Button>
+      </Card.Footer>
+      <Card.Description>
+        Ambiente demonstrativo. Depósitos e arremates são simulados.
+      </Card.Description>
+    </Card>
   );
 }

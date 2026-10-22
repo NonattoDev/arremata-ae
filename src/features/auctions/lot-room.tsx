@@ -1,20 +1,11 @@
 "use client";
+import { ArtworkImage } from "@/components/auctions/artwork-image";
+import { Button, Card, Form, Link, Typography } from "@heroui/react";
 import { useSession } from "@/components/providers/session-provider";
 import { runAction } from "@/lib/run-action";
 import { placeBidAction } from "@/server/actions/lots";
 
 import { useState, type FormEvent } from "react";
-import Link from "next/link";
-
-import { Button } from "@heroui/react";
-import {
-  ArrowUpRight,
-  ArrowRight,
-  Gavel,
-  ShieldCheck,
-  Clock3,
-  ArrowLeft,
-} from "lucide-react";
 
 import type { Room } from "@/types/auction";
 import { brl } from "@/lib/format";
@@ -65,87 +56,85 @@ export function LotRoom({ id }: { id: string }) {
   };
   if (!lot)
     return (
-      <section className="page">
+      <Card>
         {resource.error ? <Notice>{resource.error}</Notice> : <Loading />}
-      </section>
+      </Card>
     );
   const minimum = lot.bidCount
     ? lot.currentAmount + lot.increment
     : lot.initial;
   return (
-    <section className="page">
-      <Link href="/" className="back">
-        <ArrowLeft size={16} /> Explorar leilões
-      </Link>
+    <Card>
+      <Link href="/">Explorar leilões</Link>
       {resource.error && (
         <Notice>Atualização interrompida: {resource.error}</Notice>
       )}
-      <div className="room-grid">
-        <div>
-          <div className="room-art">
-            <img src={lot.item.image} alt={lot.item.title} />
-            <span className={`badge ${lot.status}`}>
-              <i />
-              {labels[lot.status]}
-            </span>
-          </div>
-          <div className="art-credit">
-            <span>Acervo Cleveland Museum of Art · Domínio público</span>
-            <a href={lot.item.sourceUrl} target="_blank" rel="noreferrer">
-              Ver origem <ArrowUpRight size={15} />
-            </a>
-          </div>
-          <h2>Uma obra, muitos detalhes.</h2>
-          <dl className="details">
-            <div>
-              <dt>Artista</dt>
-              <dd>{lot.item.artist}</dd>
-            </div>
-            <div>
-              <dt>Data da obra</dt>
-              <dd>{lot.item.date}</dd>
-            </div>
-            <div>
-              <dt>Início</dt>
-              <dd>{date(lot.startsAt)}</dd>
-            </div>
-            <div>
-              <dt>Encerramento previsto</dt>
-              <dd>{date(lot.endsAt)}</dd>
-            </div>
-          </dl>
-        </div>
-        <div className="bid-panel panel">
-          <span className="eyebrow">{lot.item.artist}</span>
-          <h1>{lot.item.title}</h1>
-          <div className="bid-value">
-            <span>{lot.bidCount ? "Lance atual" : "Lance inicial"}</span>
-            <strong>{brl(lot.currentAmount || lot.initial)}</strong>
-            <small>
+      <Card.Content className="grid min-w-0 gap-6 lg:grid-cols-2">
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <ArtworkImage src={lot.item.image} alt={lot.item.title} />
+            <Typography>{labels[lot.status]}</Typography>
+          </Card.Content>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Typography>
+              Acervo Cleveland Museum of Art · Domínio público
+            </Typography>
+            <Link href={lot.item.sourceUrl} target="_blank" rel="noreferrer">
+              Ver origem
+            </Link>
+          </Card.Content>
+          <Card.Title>Uma obra, muitos detalhes.</Card.Title>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Card.Content className="flex min-w-0 flex-col gap-4">
+              <Typography>Artista</Typography>
+              <Typography>{lot.item.artist}</Typography>
+            </Card.Content>
+            <Card.Content className="flex min-w-0 flex-col gap-4">
+              <Typography>Data da obra</Typography>
+              <Typography>{lot.item.date}</Typography>
+            </Card.Content>
+            <Card.Content className="flex min-w-0 flex-col gap-4">
+              <Typography>Início</Typography>
+              <Typography>{date(lot.startsAt)}</Typography>
+            </Card.Content>
+            <Card.Content className="flex min-w-0 flex-col gap-4">
+              <Typography>Encerramento previsto</Typography>
+              <Typography>{date(lot.endsAt)}</Typography>
+            </Card.Content>
+          </Card.Content>
+        </Card.Content>
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Typography>{lot.item.artist}</Typography>
+          <Typography.Heading level={1}>{lot.item.title}</Typography.Heading>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Typography>
+              {lot.bidCount ? "Lance atual" : "Lance inicial"}
+            </Typography>
+            <Typography>{brl(lot.currentAmount || lot.initial)}</Typography>
+            <Typography>
               {lot.bidCount} lance{lot.bidCount !== 1 ? "s" : ""} registrado
               {lot.bidCount !== 1 ? "s" : ""}
-            </small>
-          </div>
-          <div className="time-box">
-            <Clock3 size={19} />
-            <div>
-              <small>
+            </Typography>
+          </Card.Content>
+          <Card.Content className="flex min-w-0 flex-col gap-4">
+            <Card.Content className="flex min-w-0 flex-col gap-4">
+              <Typography>
                 {lot.status === "scheduled"
                   ? "Começa em"
                   : lot.status === "live"
                     ? "Encerra em"
                     : "Disputa finalizada"}
-              </small>
+              </Typography>
               {["live", "scheduled"].includes(lot.status) && (
-                <strong>
+                <Typography>
                   <Countdown
                     end={lot.status === "scheduled" ? lot.startsAt : lot.endsAt}
                     serverTime={lot.serverTime}
                   />
-                </strong>
+                </Typography>
               )}
-            </div>
-          </div>
+            </Card.Content>
+          </Card.Content>
           {!lot.intact && (
             <Notice>
               Histórico adulterado. Este lote está bloqueado para sua segurança.
@@ -164,7 +153,7 @@ export function LotRoom({ id }: { id: string }) {
           {lot.status === "live" &&
             lot.intact &&
             (user?.role === "bidder" ? (
-              <form onSubmit={sendBid}>
+              <Form onSubmit={sendBid} className="flex flex-col gap-4">
                 <Field
                   name="amount"
                   label="Seu lance (R$)"
@@ -176,60 +165,49 @@ export function LotRoom({ id }: { id: string }) {
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={lot.isLeader}
                 />
-                <div className="bid-help">
-                  <span>Mínimo: {brl(minimum)}</span>
-                  <span>Incremento: {brl(lot.increment)}</span>
-                </div>
+                <Card.Content className="flex min-w-0 flex-col gap-4">
+                  <Typography>Mínimo: {brl(minimum)}</Typography>
+                  <Typography>Incremento: {brl(lot.increment)}</Typography>
+                </Card.Content>
                 <Button
                   type="submit"
-                  className="orange-button"
+
                   fullWidth
                   isPending={busy}
                   isDisabled={lot.isLeader || !!resource.error}
                 >
-                  <Gavel size={18} />
                   {lot.isLeader ? "Você está na liderança" : "Confirmar lance"}
                 </Button>
-                <p className="available">
+                <Typography.Paragraph>
                   Disponível: {wallet.data ? brl(wallet.data.available) : "…"}{" "}
                   <Link href="/carteira">Adicionar saldo</Link>
-                </p>
-              </form>
+                </Typography.Paragraph>
+              </Form>
             ) : user ? (
               <Notice>Leiloeiros não podem dar lances.</Notice>
             ) : (
-              <Link className="button-link orange-button full" href="/entrar">
-                Entre para dar seu lance <ArrowRight size={18} />
-              </Link>
+              <Link href="/entrar">Entre para dar seu lance</Link>
             ))}
           {error && <Notice>{error}</Notice>}
           {message && <Notice good>{message}</Notice>}
           {lot.hasWinner && (
-            <Link
-              className="button-link dark-button full"
-              href={`/comprovante/${id}`}
-            >
-              Ver comprovante <ArrowUpRight size={17} />
-            </Link>
+            <Link href={`/comprovante/${id}`}>Ver comprovante</Link>
           )}
-          <p className="fine-print">
+          <Typography.Paragraph>
             Lances aceitos nos últimos 2 minutos prorrogam a disputa para 2
             minutos após o lance. Seu saldo fica reservado enquanto você
             liderar.
-          </p>
-          <Link className="audit-link" href={`/auditoria/${id}`}>
-            <ShieldCheck size={18} /> Verificar histórico deste lote{" "}
-            <ArrowUpRight size={16} />
-          </Link>
-        </div>
-      </div>
-      <section className="history">
-        <div className="section-heading">
-          <h2>Cada lance conta.</h2>
-          <span className="muted">Histórico atualizado automaticamente</span>
-        </div>
+          </Typography.Paragraph>
+          <Link href={`/auditoria/${id}`}>Verificar histórico deste lote </Link>
+        </Card.Content>
+      </Card.Content>
+      <Card>
+        <Card.Content className="flex min-w-0 flex-col gap-4">
+          <Card.Title>Cada lance conta.</Card.Title>
+          <Typography>Histórico atualizado automaticamente</Typography>
+        </Card.Content>
         <BidTable bids={lot.bids} />
-      </section>
-    </section>
+      </Card>
+    </Card>
   );
 }

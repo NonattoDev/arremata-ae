@@ -1,48 +1,40 @@
 "use client";
-
-import Link from "next/link";
-
-import { ArrowUpRight, Clock3 } from "lucide-react";
-
+import { ArtworkImage } from "@/components/auctions/artwork-image";
+import { Card, Chip, Link, Typography } from "@heroui/react";
 import type { Lot } from "@/types/auction";
-import { brl } from "@/lib/format";
-import { date } from "@/lib/format";
-import { labels } from "@/lib/format";
-import { Countdown } from "@/components/auctions/countdown";
+import { brl, labels } from "@/lib/format";
+import { Countdown } from "./countdown";
 export function LotCard({ lot }: { lot: Lot }) {
   return (
-    <Link href={`/lotes/${lot.id}`} className="lot-card">
-      <div className="art-wrap">
-        <img src={lot.item.image} alt={lot.item.title} loading="lazy" />
-        <span className={`badge ${lot.status}`}>
-          <i />
-          {labels[lot.status]}
-        </span>
-        <span className="art-arrow">
-          <ArrowUpRight size={20} />
-        </span>
-      </div>
-      <div className="card-meta">
-        <span>{lot.item.artist}</span>
-        <span>{lot.item.date}</span>
-      </div>
-      <h3>{lot.item.title}</h3>
-      <div className="card-bottom">
-        <div>
-          <span>{lot.bidCount ? "Lance atual" : "Lance inicial"}</span>
-          <strong>{brl(lot.currentAmount || lot.initial)}</strong>
-        </div>
-        <div className="card-time">
-          <Clock3 size={14} />
-          {lot.status === "live" ? (
-            <Countdown end={lot.endsAt} />
-          ) : lot.status === "scheduled" ? (
-            <span>{new Date(lot.startsAt).toLocaleDateString("pt-BR")}</span>
-          ) : (
-            <span>{lot.bidCount} lances</span>
-          )}
-        </div>
-      </div>
-    </Link>
+    <Card className="min-w-0">
+      <Card.Header>
+        <Chip>{labels[lot.status]}</Chip>
+        <Card.Title>
+          <Link href={`/lotes/${lot.id}`}>{lot.item.title}</Link>
+        </Card.Title>
+        <Card.Description>
+          {lot.item.artist} · {lot.item.date}
+        </Card.Description>
+      </Card.Header>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <ArtworkImage src={lot.item.image} alt={lot.item.title} compact />
+        <Typography>
+          {lot.bidCount ? "Lance atual" : "Lance inicial"}:{" "}
+          {brl(lot.currentAmount || lot.initial)}
+        </Typography>
+      </Card.Content>
+      <Card.Footer className="flex flex-wrap items-center gap-3">
+        {lot.status === "live" ? (
+          <Countdown end={lot.endsAt} />
+        ) : (
+          <Typography>
+            {lot.status === "scheduled"
+              ? new Date(lot.startsAt).toLocaleDateString("pt-BR")
+              : lot.bidCount + " lances"}
+          </Typography>
+        )}
+        <Link href={`/lotes/${lot.id}`}>Ver lote</Link>
+      </Card.Footer>
+    </Card>
   );
 }

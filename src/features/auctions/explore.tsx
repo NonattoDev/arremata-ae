@@ -1,15 +1,14 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-
 import {
-  ArrowUpRight,
-  Gavel,
-  ShieldCheck,
-  Wallet,
-  Search,
-  Radio,
-} from "lucide-react";
+  Alert,
+  Card,
+  Typography,
+  SearchField,
+  Label,
+  Input,
+  Tabs,
+} from "@heroui/react";
+import { useState } from "react";
 
 import type { Lot } from "@/types/auction";
 import { labels } from "@/lib/format";
@@ -31,161 +30,79 @@ export function Explore() {
           .includes(query.toLowerCase()),
     ) || [];
   return (
-    <>
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">
-            <span className="live-dot" /> O EXTRAORDINÁRIO PODE SER SEU
-          </span>
-          <h1>
-            Dê seu lance.
-            <br />
-            Leve uma <em>história.</em>
-          </h1>
-          <p>
-            Descubra obras que atravessam o tempo.
-            <br />
-            Acompanhe cada lance e encontre a sua próxima conquista.
-          </p>
-          <a className="button-link orange-button" href="#leiloes">
-            Explorar leilões <ArrowUpRight size={20} />
-          </a>
-          <div className="hero-trust">
-            <ShieldCheck size={18} />
-            <span>Lances transparentes. Histórico verificável.</span>
-          </div>
-        </div>
-        <div className="hero-art">
-          {lots?.[0] ? (
-            <>
-              <img src={lots[0].item.image} alt={lots[0].item.title} />
-              <div className="hero-caption">
-                <div>
-                  <span>EM DESTAQUE</span>
-                  <strong>{lots[0].item.artist}</strong>
-                </div>
-                <Link
-                  href={`/lotes/${lots[0].id}`}
-                  aria-label="Ver lote em destaque"
-                >
-                  <ArrowUpRight />
-                </Link>
-              </div>
-              <div className="art-label">
-                UMA OBRA.
-                <br />
-                INFINITAS HISTÓRIAS.
-              </div>
-            </>
-          ) : (
-            <div className="art-placeholder">
-              <Gavel size={60} />
-              <span>Seu próximo encontro com a arte.</span>
-            </div>
-          )}
-        </div>
-      </section>
-      <section className="benefits">
-        <div>
-          <Radio />
-          <span>
-            <strong>Disputa ao vivo</strong>Novos lances sem recarregar
-          </span>
-        </div>
-        <div>
-          <ShieldCheck />
-          <span>
-            <strong>Histórico auditável</strong>Transparência em cada lance
-          </span>
-        </div>
-        <div>
-          <Wallet />
-          <span>
-            <strong>Carteira simulada</strong>Explore sem dinheiro real
-          </span>
-        </div>
-      </section>
-      <section className="catalog-section" id="leiloes">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">ENCONTRE O QUE TE MOVE</span>
-            <h2>O próximo lance é seu.</h2>
-          </div>
-          <label className="search-box">
-            <Search size={18} />
-            <input
-              aria-label="Buscar obra ou artista"
-              placeholder="Busque uma obra ou artista"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </label>
-        </div>
-        <div className="tabs" role="tablist" aria-label="Status dos leilões">
-          {["live", "scheduled", "closed"].map((t) => (
-            <button
-              key={t}
-              role="tab"
-              aria-selected={tab === t}
-              onClick={() => setTab(t)}
-              className={tab === t ? "selected" : ""}
-            >
-              {t === "live" && <span className="live-dot" />}
-              {labels[t]}
-              <span className="count">
-                {lots?.filter((l) => l.status === t).length || 0}
-              </span>
-            </button>
-          ))}
-        </div>
-        {error && <Notice>{error}</Notice>}
-        {!lots && !error ? (
-          <Loading />
-        ) : visible.length ? (
-          <div className="lot-grid">
-            {visible.map((l) => (
-              <LotCard key={l.id} lot={l} />
+    <Card>
+      <Card.Header>
+        <Typography.Heading level={1}>
+          Dê seu lance. Leve uma história.
+        </Typography.Heading>
+        <Card.Description>
+          Descubra obras que atravessam o tempo. Acompanhe cada lance e encontre
+          sua próxima conquista.
+        </Card.Description>
+      </Card.Header>
+      <Card.Content className="flex min-w-0 flex-col gap-4">
+        <Alert status="default">
+          <Alert.Indicator />
+          <Alert.Content>
+            <Alert.Title>Leilões demonstrativos</Alert.Title>
+            <Alert.Description>
+              Lances ao vivo, histórico verificável e saldo simulado. Sem
+              dinheiro real.
+            </Alert.Description>
+          </Alert.Content>
+        </Alert>
+      </Card.Content>
+      <Card.Content id="leiloes" className="flex min-w-0 flex-col gap-6">
+        <Typography.Heading level={2}>
+          O próximo lance é seu.
+        </Typography.Heading>
+        <SearchField value={query} onChange={setQuery}>
+          <Label>Buscar obra ou artista</Label>
+          <Input placeholder="Busque uma obra ou artista" />
+        </SearchField>
+        <Tabs
+          selectedKey={tab}
+          onSelectionChange={(key) => setTab(String(key))}
+        >
+          <Tabs.List aria-label="Status dos leilões" className="flex flex-wrap">
+            {["live", "scheduled", "closed"].map((status) => (
+              <Tabs.Tab key={status} id={status}>
+                {labels[status]} (
+                {lots?.filter((l) => l.status === status).length || 0})
+                <Tabs.Indicator />
+              </Tabs.Tab>
             ))}
-          </div>
-        ) : (
-          <Empty
-            title={
-              query
-                ? "Nenhuma obra encontrada."
-                : "Nenhum lote nesta categoria."
-            }
-          />
-        )}
-      </section>
-      <section className="how">
-        <span className="eyebrow">SIMPLES ASSIM</span>
-        <h2>Da descoberta ao arremate.</h2>
-        <div className="steps">
-          {[
-            [
-              "01",
-              "Encontre sua obra",
-              "Explore o acervo e escolha a história que combina com você.",
-            ],
-            [
-              "02",
-              "Entre na disputa",
-              "Adicione saldo simulado e acompanhe seus lances ao vivo.",
-            ],
-            [
-              "03",
-              "Celebre a conquista",
-              "Venceu? Seu comprovante fica disponível para compartilhar.",
-            ],
-          ].map(([n, t, d]) => (
-            <div key={n}>
-              <span>{n}</span>
-              <h3>{t}</h3>
-              <p>{d}</p>
-            </div>
+          </Tabs.List>
+          {["live", "scheduled", "closed"].map((status) => (
+            <Tabs.Panel
+              key={status}
+              id={status}
+              className="grid min-w-0 gap-4 md:grid-cols-2 xl:grid-cols-3"
+            >
+              {error && <Notice>{error}</Notice>}
+              {!lots && !error ? (
+                <Loading />
+              ) : visible.length ? (
+                visible.map((l) => <LotCard key={l.id} lot={l} />)
+              ) : (
+                <Empty
+                  title={
+                    query
+                      ? "Nenhuma obra encontrada."
+                      : "Nenhum lote nesta categoria."
+                  }
+                />
+              )}
+            </Tabs.Panel>
           ))}
-        </div>
-      </section>
-    </>
+        </Tabs>
+      </Card.Content>
+      <Card.Footer className="flex flex-wrap items-center gap-3">
+        <Typography.Paragraph>
+          Escolha sua obra, adicione saldo simulado e participe. Se vencer, seu
+          comprovante ficará disponível para compartilhar.
+        </Typography.Paragraph>
+      </Card.Footer>
+    </Card>
   );
 }

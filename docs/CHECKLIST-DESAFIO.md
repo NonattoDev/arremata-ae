@@ -109,7 +109,7 @@ A redação do anti-sniping comporta interpretação. Nossa implementação usa 
 
 - [x] Disponibilizar deploy público funcionando.
 - [x] Disponibilizar repositório público no GitHub com a aplicação.
-- [ ] Deixar semeados 1 leiloeiro, 2 clientes e pelo menos 1 lote publicado aberto para lances na avaliação.
+- [x] Deixar semeados 1 leiloeiro, 2 clientes e pelo menos 1 lote publicado aberto para lances na avaliação.
 - [x] Incluir README detalhado com configuração e execução passo a passo.
 - [x] Explicar no README como configurar e utilizar o banco.
 - [x] Documentar funcionalidades com comportamento inesperado e limitações conhecidas.
@@ -136,16 +136,16 @@ Não é necessário fazer nota fiscal, revenda entre usuários, aplicativo nativ
 
 ## Situação do projeto e o que falta fechar
 
-Revisão atual: código de todas as áreas obrigatórias lido; 13 testes automatizados aprovados; smoke HTTP local com três logins, lances, saldo, auditoria e imagem; cadastro/publicação/cancelamento/logout exercitados localmente. Vercel consultada: último deploy anterior READY; GitHub confirmado PUBLIC. As alterações atuais ainda precisam ser publicadas e verificadas.
+Revisão atual: código de todas as áreas obrigatórias lido; 13 testes automatizados aprovados; smoke HTTP local com três logins, lances, saldo, auditoria e imagem; cadastro/publicação/cancelamento/logout exercitados localmente. Vercel consultada: último deploy anterior READY; GitHub confirmado PUBLIC. Revisão 8b425bf publicada: deploy dpl_D7byTETGeiRUuF6LXER15bosWMUV READY e smoke HTTP autenticado aprovado na URL pública.
 
 | Área | Evidência disponível | O que falta antes da entrega |
 | --- | --- | --- |
 | Funcionalidades de frontend | Telas implementadas; fluxos de login, carteira, lances e navegação já exercitados | Revisar todos os fluxos da interface final, incluindo cadastro e ambos os perfis |
-| Interface final | Rotas, logo e navbar ajustadas localmente; TypeScript e build passaram | Validar versão final no celular e publicar as mudanças locais |
+| Interface final | Rotas, logo e navbar ajustadas localmente; TypeScript e build passaram | Validar versão final no celular; mudanças publicadas na revisão 8b425bf |
 | Backend | Testes de regras, concorrência, reserva, liquidação e adulteração reexecutados | 13 testes aprovados nesta auditoria, incluindo indisponibilidade externa e propriedade entre leiloeiros |
 | API externa | Importação real e imagem persistida registradas | Teste de falha de fetch aprovado: listagem, sala, lance, auditoria, liquidação, comprovante e imagem persistida independem da API |
-| Produção | Vercel + Neon publicados; login, lance, auditoria, comprovante e cron real comprovados no registro anterior | Conferir novamente após publicar a versão final |
-| Seed | 1 leiloeiro, 2 licitantes e lotes abertos registrados na publicação | Garantir ao menos 1 lote aberto quando a banca acessar; horários expiram |
+| Produção | Vercel + Neon publicados; login, lance, auditoria, comprovante e cron real comprovados no registro anterior | Revisão 8b425bf READY; smoke com três logins e lances aprovado, comprovante público conferido sem login |
+| Seed | 1 leiloeiro, 2 licitantes e lotes abertos registrados na publicação | Lote f7940e19-5a07-49df-ad30-b6cc22b66c72 confirmado aberto até 05/11/2026; reconferir na entrega |
 | Opcionais | Busca/filtro, temas e testes implementados | Docker Compose e cancelamento com estorno não estão registrados como entregues; não bloqueiam o obrigatório |
 | Documentação e envio | README e documentos técnicos existentes | Revisão do candidato, relato de IA, confirmação do prazo e envio do formulário |
 
@@ -155,9 +155,9 @@ Estas são nossas verificações de qualidade; não representam novos opcionais 
 
 - [ ] Percorrer o checklist obrigatório na versão final, com leiloeiro, dois licitantes e visitante sem login.
 - [ ] Validar desktop e celular, especialmente cadastro, criação/cancelamento, lances, carteira, arremates e compartilhamento.
-- [ ] Conferir concorrência, saldo entre lotes, anti-sniping, liquidação única, adulteração e indisponibilidade externa.
-- [ ] Publicar as alterações locais e repetir a conferência principal na URL pública.
-- [ ] Garantir contas de teste acessíveis e lote aberto para avaliação.
+- [x] Conferir concorrência, saldo entre lotes, anti-sniping, liquidação única, adulteração e indisponibilidade externa. Suíte local aprovada; concorrência PostgreSQL independente registrada na validação anterior.
+- [x] Publicar as alterações locais e repetir a conferência principal na URL pública. Commit 8b425bf, deploy READY e smoke autenticado aprovados.
+- [x] Garantir contas de teste acessíveis e lote aberto para avaliação. Três logins aprovados; lote aberto até 05/11/2026, reconferir se a avaliação ocorrer depois.
 - [ ] Revisar README, limitações e relato de IA; confirmar entendimento das decisões pelo candidato.
 - [ ] Conferir prazo e links; enviar o formulário apenas com autorização explícita do candidato.
 
@@ -180,3 +180,11 @@ Evidências detalhadas: [VALIDACAO.md](VALIDACAO.md). Arquitetura: [ARQUITETURA.
 | Deploy e repositório existentes | Vercel list_deployments: dpl_BbeBw7p5TnGNr8oaEe7hs2YYhaoQ READY; gh repo view: PUBLIC | Versão anterior confirmada; atualização final separada |
 
 Prazo confirmado no e-mail que acompanha o PDF correto, recebido em 22/10/2026. O aviso anterior sobre Coderbyte e anexo de QA não é o início deste desafio. Não publicamos o conteúdo privado do e-mail no repositório.
+
+### Publicação desta auditoria
+
+- Commit de código: 8b425bf75642d44e40d05e4d42cc82ee1d77d9cd.
+- Vercel NatosTech: dpl_D7byTETGeiRUuF6LXER15bosWMUV, READY em produção.
+- Smoke público aprovado com três logins, saldo simulado, importação, lances, posição, auditoria e imagem; lote 2d86dc11-98c7-4c20-a1e2-8c8896942463.
+- Comprovante público conferido no navegador sem login, com alias do vencedor e valor de R$110.
+- Rascunho do relato de IA e links em [ENTREGA.md](ENTREGA.md); revisão do candidato e envio continuam pendentes.

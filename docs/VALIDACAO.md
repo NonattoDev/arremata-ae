@@ -74,3 +74,7 @@ Não interpretar “implementado” ou “teste local passou” como prova de fu
 - Painel exibe resultado do arremate e cópia do link do comprovante; botão conferido no navegador integrado.
 - Navegador detectou parágrafos aninhados no total do painel. Corrigido também o wrapper redundante do contador da sala; recarga/navegação não geraram novos erros de aninhamento.
 - Inspeção mobile da interface final ainda pendente; o navegador integrado disponível não expõe controle de viewport nesta sessão. Não usar inspeção desktop como prova de mobile.
+
+### Publicação da revisão auditada
+
+Commit 8b425bf publicado no GitHub pessoal e deploy Vercel dpl_D7byTETGeiRUuF6LXER15bosWMUV confirmado READY. Smoke HTTP autenticado público aprovado: três logins, autorização, depósito simulado, API real, lances, posição, auditoria e imagem. Lote do smoke: 2d86dc11-98c7-4c20-a1e2-8c8896942463. Comprovante de lote encerrado conferido sem login no navegador, com alias e R$110. Há lote aberto até 05/11/2026. Essas verificações não substituem a revisão móvel nem a revisão pessoal do candidato.

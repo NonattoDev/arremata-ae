@@ -15,7 +15,7 @@
 
 As capturas locais ficam em `output/playwright/`, ignoradas pelo Git para não publicar estados de sessões de teste.
 
-## Pendências para entrega final
+## Pendências registradas na primeira implementação (histórico)
 
 - PostgreSQL hospedado: aplicar esquema/seed e testar transações concorrentes por conexões independentes. PGlite usa fila local e não exercita o advisory lock distribuído.
 - Vercel: vincular GitHub pessoal, variáveis, deploy READY e URL pública acessível.
@@ -44,3 +44,21 @@ Não interpretar “implementado” ou “teste local passou” como prova de fu
 - Revisão independente identificou defaultValue no nível incorreto do TextField. Corrigido e revisado novamente sem novos achados P1/P2.
 - TypeScript, 12 testes e build de produção passaram; npm audit após remoção de lucide-react reportou zero vulnerabilidades.
 - A inspeção anterior em viewport móvel não comprova esta nova interface; repetir no ambiente final. Deploy Vercel e validação com PostgreSQL hospedado continuam pendentes.
+
+## Publicação Vercel + Neon — 22/10/2026
+
+- URL pública: https://arremata-ae.vercel.app. Vercel NatosTech/Pro; projeto arremata-ae ligado ao GitHub pessoal NonattoDev/arremata-ae, branch main, Node 24 e região iad1.
+- PostgreSQL 17 exclusivo no Neon pessoal Robson Nonato, região aws-us-east-1. Migration Prisma inicial aplicada e seed com 1 leiloeiro, 2 licitantes, 2 lotes abertos e 1 agendado. Runtime usa pooler e validação SSL verify-full; variáveis são segredos de produção.
+- 10 testes de domínio passaram em uma branch Neon isolada, incluindo duas conexões Prisma independentes para lances iguais, disputa da mesma carteira em lotes diferentes e liquidação concorrente; testes de adulteração não rodaram na base publicada.
+- Smoke HTTP da URL pública: três logins reais, HttpOnly, papéis, origem inválida bloqueada, depósito, importação do museu, lances, posição após ser superado, auditoria anônima e imagem própria.
+- Navegador integrado em produção: login Ana via Server Action e lance de R$100 aceito no lote 5d66d806-2e0d-4c5b-8ce9-8ad62dd33927; liderança, histórico e saldo disponível R$4910. Captura local output/playwright/production-bid.png.
+- TypeScript, 12 testes locais e build passaram após tornar o smoke e a suíte PostgreSQL reproduzíveis por variáveis explícitas.
+- Cron de um minuto habilitado; logs CDN identificam user agent vercel-cron/1.0 e resposta 200. Nenhum erro/fatal de runtime encontrado na janela inicial de 15 minutos.
+- Encerramento autônomo comprovado: lote 6dfaddac-d711-4b5c-802e-1ba0fd3550b5 venceu às 22:45:41.361Z; o cron real das 22:46:28.283Z liquidou às 22:46:28.396Z. Durante a espera, navegador ficou na tela de login, sem polling de lotes/carteira; conferência foi SELECT direto, sem chamar serviços de liquidação.
+- Banco confirmou closed, comprovante de R$110 e exatamente duas movimentações. Duas reexecuções autenticadas mantiveram duas movimentações; sem segredo, endpoint retornou 401. Auditoria e comprovante públicos responderam 200.
+
+## Pendências atuais para submissão
+
+- Repetir inspeção visual da versão HeroUI em viewport móvel e revisão final de todos os fluxos pelo candidato. A validação desktop/publicação acima não comprova revisão mobile completa.
+- Revisar decisões e relato de uso de IA; enviar o formulário somente por solicitação explícita.
+- A branch Neon validation-20261022 permanece isolada para inspeção, com suspensão após cinco minutos sem atividade; contém dados deliberadamente adulterados pelos testes e não está ligada à Vercel.

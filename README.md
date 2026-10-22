@@ -4,7 +4,7 @@ Casa de leilões demonstrativa para o desafio **Elite Dev Verzel**. Obras vêm d
 
 ## Estado
 
-Primeira implementação local. **Publicação e validação em produção ainda pendentes.** Não apresentar como entrega final sem cumprir `docs/REQUISITOS.md` e `docs/VALIDACAO.md`.
+Publicado em **https://arremata-ae.vercel.app** na Vercel (NatosTech), com PostgreSQL 17 no Neon pessoal de Robson Nonato. Repositório público pessoal: **NonattoDev/arremata-ae**. Evidências e limites de validação estão em `docs/VALIDACAO.md`; revisão do candidato e submissão do teste continuam manuais.
 
 ## Stack
 
@@ -39,7 +39,7 @@ Abra **http://localhost:4168**. Execute setup antes de iniciar o servidor; o PGl
 | Licitante | `ana@arremata.test`       | R$ 5.000      |
 | Licitante | `bruno@arremata.test`     | R$ 5.000      |
 
-A senha das três contas é `DEMO_PASSWORD` do primeiro setup. Reexecutar não redefine senhas nem repõe saldo existente. Informe a senha de demonstração ao avaliador junto à URL; não utilize credenciais pessoais.
+Na demonstração publicada, a senha das três contas é `Arremata-Demo-2026!` (contas sintéticas, sem dinheiro real). Em instalações próprias, a senha é `DEMO_PASSWORD` do primeiro setup. Reexecutar não redefine senhas nem repõe saldo existente. Informe a senha de demonstração ao avaliador junto à URL; não utilize credenciais pessoais.
 
 O seed importa três obras reais: duas abertas e uma agendada. Não duplica lotes se já houver lote aberto. Se todos expiraram, cria novo conjunto com datas relativas à execução. A primeira importação depende da API; lotes existentes não dependem dela.
 
@@ -69,7 +69,7 @@ Operações de mercado usam transação PostgreSQL com `pg_advisory_xact_lock(21
 
 `GET /api/cron/settle` autenticado liquida lotes vencidos. `vercel.json` solicita execução por minuto. Leituras de lotes/carteira e mutações também liquidam vencidos. Repetir a chamada não repete transferências. Lances fora da janela são recusados mesmo antes do cron. Lotes com auditoria inválida são bloqueados e retornados em `blocked` pelo cron.
 
-**Confirmar suporte do plano Vercel ao cron de um minuto antes da entrega.** Sem agendador, liquidação ocorre no próximo acesso; isso não substitui a verificação de encerramento sem navegadores abertos.
+A publicação usa o plano Pro da NatosTech, com cron de um minuto habilitado. As requisições reais do agendador foram conferidas nos logs da Vercel. Em outra instalação, confirmar o suporte do plano; liquidação no próximo acesso não substitui o cron.
 
 ## Auditoria e API externa
 
@@ -97,7 +97,9 @@ npm run typecheck
 npm run build
 ```
 
-Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre lotes, concorrência local, anti-sniping, liquidação, cancelamento, privacidade e adulteração direta no SQL. Um teste adicional percorre Prisma → pg → protocolo PostgreSQL → PGlite para comprovar persistência, rollback, liquidação e auditoria. **Não substituem concorrência entre conexões PostgreSQL reais.** Evidências/pendências em `docs/VALIDACAO.md`.
+Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre lotes, concorrência local, anti-sniping, liquidação, cancelamento, privacidade e adulteração direta no SQL. Um teste adicional percorre Prisma → pg → protocolo PostgreSQL → PGlite para comprovar persistência, rollback, liquidação e auditoria. A suíte de domínio também foi executada em uma branch isolada do Neon, usando conexões Prisma independentes nas disputas e na liquidação concorrente. Evidências/pendências em `docs/VALIDACAO.md`.
+
+Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplicada**, defina `POSTGRES_TEST_URL` e execute `npx tsx --test tests/auction.test.ts`. A suíte cria dados e adultera históricos deliberadamente: nunca usar a base publicada. Para smoke HTTP, `SMOKE_BASE_URL` seleciona explicitamente o destino e `DEMO_PASSWORD` autentica as contas sintéticas: `npx tsx scripts/smoke.ts`. Esse smoke cria um lote e movimenta saldo simulado.
 
 ## Organização e uso de IA
 

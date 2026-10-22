@@ -50,7 +50,7 @@ A migration inicial é idempotente para incorporar a base desta primeira versão
 
 ## Verificação e limites
 
-Testes de domínio preservam as regras do PDF. O teste do adapter exercita Prisma/pg através de conexão TCP contra PGlite, com rollback e liquidação idempotente. Isso valida integração de tipos/protocolo/transações, mas não reproduz concorrência multi-instância de PostgreSQL hospedado. Essa prova e o deploy Vercel continuam pendentes.
+Testes de domínio preservam as regras do PDF. O teste do adapter exercita Prisma/pg através de conexão TCP contra PGlite, com rollback e liquidação idempotente. Isso valida integração de tipos/protocolo/transações, mas não reproduz concorrência multi-instância de PostgreSQL hospedado. Essa prova foi executada em branch isolada Neon com conexões independentes; a aplicação está publicada na Vercel. Consulte as evidências e os limites em `VALIDACAO.md`.
 
 ## Interface HeroUI
 

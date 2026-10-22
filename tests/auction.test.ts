@@ -1,11 +1,17 @@
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
-import { createLocalDatabase } from "../src/server/database";
+import {
+  createLocalDatabase,
+  createPostgresDatabase,
+} from "../src/server/database";
 import { AuctionService } from "../src/server/auction";
 import { schema } from "../src/server/schema";
 
 let db: Awaited<ReturnType<typeof createLocalDatabase>>;
-let service: AuctionService;
+let service: AuctionService, concurrentService: AuctionService;
+let concurrentDb: ReturnType<typeof createPostgresDatabase> | undefined;
+// Only point this opt-in URL at a disposable validation database.
+const postgresUrl = process.env.POSTGRES_TEST_URL;
 let clock = Date.parse("2026-10-22T12:00:00Z");
 let seller: string, alice: string, bob: string;
 const item = {
@@ -17,13 +23,23 @@ const item = {
   date: "1888",
 };
 before(async () => {
-  db = await createLocalDatabase();
-  await db.query(schema);
+  db = postgresUrl
+    ? createPostgresDatabase(postgresUrl)
+    : await createLocalDatabase();
+  if (!postgresUrl) await db.query(schema);
   service = new AuctionService(
     db,
     "test-audit-secret-with-more-than-32-characters",
     () => clock,
   );
+  concurrentDb = postgresUrl ? createPostgresDatabase(postgresUrl) : undefined;
+  concurrentService = concurrentDb
+    ? new AuctionService(
+        concurrentDb,
+        "test-audit-secret-with-more-than-32-characters",
+        () => clock,
+      )
+    : service;
   seller = await service.createUser(
     "seller@test.local",
     "Vendedor",
@@ -40,6 +56,7 @@ before(async () => {
 });
 after(async () => {
   await db?.close();
+  await concurrentDb?.close();
 });
 const lot = (extra = {}) =>
   service.createLot(seller, {
@@ -83,7 +100,7 @@ test("concurrent equal bids accept exactly one winner", async () => {
   const id = await lot();
   const results = await Promise.allSettled([
     service.bid(alice, id, 10000),
-    service.bid(bob, id, 10000),
+    concurrentService.bid(bob, id, 10000),
   ]);
   assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
   assert.equal((await service.audit(id)).bids.length, 1);
@@ -100,7 +117,7 @@ test("simultaneous bids across different lots cannot spend the same funds twice"
     b = await lot();
   const results = await Promise.allSettled([
     service.bid(user, a, 10000),
-    service.bid(user, b, 10000),
+    concurrentService.bid(user, b, 10000),
   ]);
   assert.equal(results.filter((r) => r.status === "fulfilled").length, 1);
   assert.equal((await service.wallet(user)).available, 0);
@@ -118,7 +135,7 @@ test("settles once, rejects bids exactly at end and creates anonymous receipt", 
   await service.bid(bob, id, 10000);
   clock += 130000;
   await assert.rejects(service.bid(alice, id, 20000), /encerrado/i);
-  await Promise.all([service.settle(), service.settle()]);
+  await Promise.all([service.settle(), concurrentService.settle()]);
   const transfers = await db.query(
     "SELECT amount,kind FROM ledger WHERE lot_id=$1 ORDER BY amount",
     [id],

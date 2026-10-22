@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 
-// Explicit, opt-in smoke test against a LOCAL running app. Creates demo lots and deposits.
-const base = "http://localhost:4168";
+// Opt-in smoke test. Creates demo lots/deposits on the explicitly selected target.
+const base = process.env.SMOKE_BASE_URL || "http://localhost:4168";
 const password = process.env.DEMO_PASSWORD;
-if (!password) throw new Error("Run with --env-file=.env.local.");
+if (!password)
+  throw new Error("Defina DEMO_PASSWORD no arquivo de ambiente do destino.");
 async function call(
   path: string,
   body?: unknown,

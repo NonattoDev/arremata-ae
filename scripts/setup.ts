@@ -7,7 +7,8 @@ import { importArt } from "../src/server/catalog";
 async function main() {
   const db = await database();
   try {
-    await db.query(schema);
+    // Production schema is applied by Prisma Migrate, never implicitly by seed.
+    if (!process.env.DATABASE_URL) await db.query(schema);
     const password = process.env.DEMO_PASSWORD;
     if (!password || password.length < 12)
       throw new Error("Defina DEMO_PASSWORD com pelo menos 12 caracteres.");

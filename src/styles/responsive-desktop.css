@@ -1,0 +1,36 @@
+@media (min-width: 1441px) {
+  .benefits {
+    width: 90%;
+  }
+}
+@media (max-width: 1100px) {
+  .nav {
+    gap: 15px;
+    margin-left: 0;
+  }
+  .header {
+    gap: 20px;
+  }
+  .hero-art {
+    height: 370px;
+  }
+  .benefits {
+    margin: 0 5%;
+  }
+  .user-name {
+    display: none;
+  }
+  .art-wrap {
+    height: 240px;
+  }
+  .card-meta {
+    flex-direction: column;
+    gap: 0;
+  }
+  .card-meta > span:first-child {
+    max-width: none;
+  }
+  .import-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

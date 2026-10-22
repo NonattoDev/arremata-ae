@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Role is constrained to seller/bidder by the migration CHECK constraint.
+model User {
+  id           String        @id
+  email        String        @unique
+  name         String
+  passwordHash String        @map("password_hash")
+  role         String
+  alias        String        @unique
+  balance      BigInt        @default(0)
+  sessions     Session[]
+  offeredLots  Lot[]         @relation("Seller")
+  leadingLots  Lot[]         @relation("Leader")
+  bids         Bid[]
+  ledger       LedgerEntry[]
+
+  @@map("users")
+}
+
+model Session {
+  tokenHash String   @id @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@map("sessions")
+}
+
+/// Item contains the immutable external metadata and cached image snapshot.
+/// Monetary values are integer cents; CHECK constraints live in the migration.
+model Lot {
+  id            String        @id
+  sellerId      String        @map("seller_id")
+  item          Json          @db.JsonB
+  initial       BigInt
+  increment     BigInt
+  startsAt      DateTime      @map("starts_at") @db.Timestamptz
+  endsAt        DateTime      @map("ends_at") @db.Timestamptz
+  status        String        @default("open")
+  currentAmount BigInt        @default(0) @map("current_amount")
+  leaderId      String?       @map("leader_id")
+  bidCount      Int           @default(0) @map("bid_count")
+  headHash      String        @map("head_hash")
+  checkpoint    String
+  receipt       Json?         @db.JsonB
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  seller        User          @relation("Seller", fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  leader        User?         @relation("Leader", fields: [leaderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bids          Bid[]
+  ledger        LedgerEntry[]
+
+  @@index([status, endsAt], map: "lots_due")
+  @@map("lots")
+}
+
+model Bid {
+  id           String   @id
+  lotId        String   @map("lot_id")
+  bidderId     String   @map("bidder_id")
+  alias        String
+  amount       BigInt
+  sequence     Int
+  placedAt     DateTime @map("placed_at") @db.Timestamptz
+  previousHash String   @map("previous_hash")
+  hash         String
+  lot          Lot      @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bidder       User     @relation(fields: [bidderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([lotId, sequence], map: "bids_lot_id_sequence_key")
+  @@index([lotId, sequence], map: "bids_lot")
+  @@index([bidderId, lotId], map: "bids_user")
+  @@map("bids")
+}
+
+model LedgerEntry {
+  id        String   @id
+  userId    String   @map("user_id")
+  lotId     String?  @map("lot_id")
+  amount    BigInt
+  kind      String
+  createdAt DateTime @map("created_at") @db.Timestamptz
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lot       Lot?     @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([userId, lotId, kind], map: "ledger_user_id_lot_id_kind_key")
+  @@map("ledger")
+}
+
+model RateLimit {
+  key      String   @id
+  hits     Int
+  resetsAt DateTime @map("resets_at") @db.Timestamptz
+
+  @@map("rate_limits")
+}

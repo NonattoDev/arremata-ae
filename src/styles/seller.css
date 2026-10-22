@@ -1,0 +1,71 @@
+.lot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  margin: 14px 0;
+}
+.lot-actions a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.winning {
+  color: #488254;
+}
+.catalog-search {
+  display: flex;
+  gap: 12px;
+  margin: 25px 0;
+}
+.catalog-search .search-box {
+  flex: 1;
+}
+.import-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 30px;
+}
+.import-card {
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: left;
+  position: relative;
+  background: var(--surface);
+}
+.import-card.chosen {
+  border-color: var(--orange);
+}
+.import-card > img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+.import-card > strong,
+.import-card > span {
+  display: block;
+  font-size: 12px;
+  margin-top: 6px;
+}
+.import-card > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.import-card > .chosen-label {
+  display: flex;
+  gap: 4px;
+  color: var(--orange);
+}
+.lot-form {
+  max-width: 850px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 22px;
+}

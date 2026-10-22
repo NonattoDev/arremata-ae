@@ -1,0 +1,162 @@
+@media (max-width: 540px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .hero h1 {
+    font-size: 54px;
+  }
+  .hero p {
+    font-size: 14px;
+  }
+  .hero-art {
+    height: 320px;
+    border-top-left-radius: 90px;
+  }
+  .hero-trust {
+    font-size: 11px;
+  }
+  .eyebrow {
+    font-size: 9px;
+  }
+  .hero-caption strong {
+    font-size: 21px;
+  }
+  .benefits {
+    padding: 19px 0;
+    gap: 15px;
+    grid-template-columns: 1fr;
+  }
+  .benefits > div {
+    justify-content: flex-start;
+    border: 0;
+    gap: 14px;
+  }
+  .benefits strong {
+    font-size: 12px;
+  }
+  .benefits span {
+    font-size: 11px;
+  }
+  .lot-grid {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+  .art-wrap {
+    height: 340px;
+  }
+  .card-meta {
+    flex-direction: row;
+  }
+  .lot-card h3 {
+    min-height: 0;
+  }
+  .tabs {
+    gap: 0;
+  }
+  .tabs button {
+    padding: 12px 10px;
+  }
+  .steps {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .steps > div {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 14px;
+  }
+  .steps h3 {
+    font-size: 21px;
+  }
+  .steps p {
+    max-width: none;
+  }
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+  .auth-story {
+    display: none;
+  }
+  .auth-panel {
+    padding: 25px;
+  }
+  .balance-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .balance-card {
+    position: relative;
+    padding: 20px;
+  }
+  .balance-card > svg {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+  .balance-card > span {
+    margin-top: 0;
+  }
+  .balance-card strong {
+    font-size: 32px;
+  }
+  .wallet-bottom {
+    grid-template-columns: 1fr;
+  }
+  .wallet-explanation {
+    padding: 20px 0;
+  }
+  .panel {
+    padding: 24px;
+  }
+  .bid-panel h1 {
+    font-size: 30px;
+  }
+  .room-art img {
+    max-height: 430px;
+  }
+  .import-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .import-card > img {
+    height: 130px;
+  }
+  .catalog-search {
+    flex-direction: column;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .audit-result {
+    padding: 20px;
+  }
+  .audit-result h2 {
+    font-size: 23px;
+  }
+  .receipt h1 {
+    font-size: 31px;
+  }
+  .header .button-link {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .header-actions > .button {
+    min-width: 30px;
+    width: 30px;
+  }
+  .art-credit {
+    flex-wrap: wrap;
+  }
+  .section-heading h2 {
+    font-size: 29px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *:before,
+  *:after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

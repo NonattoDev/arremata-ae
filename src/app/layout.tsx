@@ -1,3 +1,5 @@
+import { AppShell } from "@/components/layout/app-shell";
+import { SessionProvider } from "@/components/providers/session-provider";
 import type { Metadata } from "next";
 import "./globals.css";
 export const metadata: Metadata = {
@@ -12,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" data-scroll-behavior="smooth">
-      <body>{children}</body>
+      <body>
+        <SessionProvider>
+          <AppShell>{children}</AppShell>
+        </SessionProvider>
+      </body>
     </html>
   );
 }

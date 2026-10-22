@@ -1,0 +1,48 @@
+.balance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin: 35px 0;
+}
+.balance-card {
+  padding: 25px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.balance-card > span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 18px;
+}
+.balance-card strong {
+  font-size: 34px;
+  letter-spacing: -0.04em;
+}
+.balance-card.highlight {
+  background: #283d30;
+  color: #fff;
+}
+.balance-card.highlight > span {
+  color: #cad9c8;
+}
+.wallet-bottom {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 50px;
+}
+.wallet-bottom .panel form {
+  margin-top: 25px;
+}
+.wallet-explanation {
+  padding: 30px;
+  color: var(--muted);
+}
+.wallet-explanation h2 {
+  color: var(--ink);
+  margin: 20px 0;
+}
+.wallet-explanation p {
+  font-size: 13px;
+}

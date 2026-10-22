@@ -1,29 +1,8 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import type { Database, Queryable, Row } from "./database";
 
-export class DomainError extends Error {
-  constructor(
-    message: string,
-    public status = 400,
-  ) {
-    super(message);
-  }
-}
-export type Item = {
-  externalId: string;
-  title: string;
-  artist: string;
-  date: string;
-  image: string;
-  sourceUrl: string;
-};
-export type LotInput = {
-  item: Item;
-  initial: number;
-  increment: number;
-  startsAt: string;
-  endsAt: string;
-};
+import { DomainError, type Item, type LotInput } from "./domain/types";
+export { DomainError, type Item, type LotInput } from "./domain/types";
 const iso = (value: string | Date) => new Date(value).toISOString();
 function money(value: number) {
   if (!Number.isSafeInteger(value) || value <= 0 || value > 1000000000)
@@ -32,50 +11,16 @@ function money(value: number) {
     );
 }
 
+import { AuditService } from "./domain/audit";
+
 export class AuctionService {
+  private integrity: AuditService;
   constructor(
     private db: Database,
-    private secret: string,
+    secret: string,
     private now: () => number = Date.now,
   ) {
-    if (secret.length < 32)
-      throw new Error("AUDIT_SECRET precisa ter pelo menos 32 caracteres.");
-  }
-  private sign(data: unknown) {
-    return createHmac("sha256", this.secret)
-      .update(JSON.stringify(data))
-      .digest("hex");
-  }
-  private checkpoint(l: Row) {
-    return this.sign([
-      "checkpoint-v1",
-      l.id,
-      l.seller_id,
-      l.item,
-      Number(l.initial),
-      Number(l.increment),
-      iso(l.starts_at),
-      iso(l.ends_at),
-      l.status,
-      Number(l.current_amount),
-      l.leader_id,
-      l.bid_count,
-      l.head_hash,
-      l.receipt,
-    ]);
-  }
-  private bidHash(b: Row) {
-    return this.sign([
-      "bid-v1",
-      b.id,
-      b.lot_id,
-      b.bidder_id,
-      b.alias,
-      Number(b.amount),
-      b.sequence,
-      iso(b.placed_at),
-      b.previous_hash,
-    ]);
+    this.integrity = new AuditService(secret);
   }
   private async user(tx: Queryable, id: string, role?: string) {
     const [u] = await tx.query("SELECT * FROM users WHERE id=$1", [id]);
@@ -94,50 +39,6 @@ export class AuctionService {
     if (!l) throw new DomainError("Lote não encontrado.", 404);
     return l;
   }
-  private async saveCheckpoint(tx: Queryable, id: string) {
-    const l = await this.lot(tx, id);
-    await tx.query("UPDATE lots SET checkpoint=$2 WHERE id=$1", [
-      id,
-      this.checkpoint(l),
-    ]);
-  }
-  private async auditData(tx: Queryable, l: Row) {
-    const bids = await tx.query(
-      "SELECT * FROM bids WHERE lot_id=$1 ORDER BY sequence",
-      [l.id],
-    );
-    let previous = this.sign(["genesis-v1", l.id]);
-    let intact =
-      l.checkpoint === this.checkpoint(l) && bids.length === l.bid_count;
-    for (let i = 0; i < bids.length; i++) {
-      const b = bids[i];
-      intact =
-        intact &&
-        b.sequence === i + 1 &&
-        b.previous_hash === previous &&
-        b.hash === this.bidHash(b);
-      previous = b.hash;
-    }
-    intact = intact && previous === l.head_hash;
-    return {
-      intact,
-      bids: bids.map((b) => ({
-        alias: b.alias,
-        amount: Number(b.amount),
-        sequence: b.sequence,
-        placedAt: iso(b.placed_at),
-        hash: b.hash,
-      })),
-      checkpoint: l.checkpoint,
-    };
-  }
-  private async requireIntegrity(tx: Queryable, l: Row) {
-    if (!(await this.auditData(tx, l)).intact)
-      throw new DomainError(
-        "Histórico adulterado. Operações deste lote foram bloqueadas.",
-        409,
-      );
-  }
   private async balances(tx: Queryable, id: string) {
     const u = await this.user(tx, id);
     const [row] = await tx.query(
@@ -155,7 +56,7 @@ export class AuctionService {
     );
     const blocked: string[] = [];
     for (const l of due) {
-      if (!(await this.auditData(tx, l)).intact) {
+      if (!(await this.integrity.auditData(tx, l)).intact) {
         blocked.push(l.id);
         continue;
       }
@@ -192,7 +93,7 @@ export class AuctionService {
         "UPDATE lots SET status='closed', receipt=$2 WHERE id=$1",
         [l.id, JSON.stringify(receipt)],
       );
-      await this.saveCheckpoint(tx, l.id);
+      await this.integrity.saveCheckpoint(tx, l.id);
     }
     return { processed: due.length - blocked.length, blocked };
   }
@@ -258,7 +159,7 @@ export class AuctionService {
     return this.db.transaction(async (tx) => {
       await this.user(tx, seller, "seller");
       const id = randomUUID(),
-        head = this.sign(["genesis-v1", id]);
+        head = this.integrity.sign(["genesis-v1", id]);
       await tx.query(
         "INSERT INTO lots (id,seller_id,item,initial,increment,starts_at,ends_at,head_hash,checkpoint) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)",
         [
@@ -273,7 +174,7 @@ export class AuctionService {
           "pending",
         ],
       );
-      await this.saveCheckpoint(tx, id);
+      await this.integrity.saveCheckpoint(tx, id);
       return id;
     });
   }
@@ -284,7 +185,7 @@ export class AuctionService {
       await this.settleInside(tx);
       const l = await this.lot(tx, lotId);
       const now = this.now();
-      await this.requireIntegrity(tx, l);
+      await this.integrity.requireIntegrity(tx, l);
       if (l.status !== "open" || now >= new Date(l.ends_at).getTime())
         throw new DomainError("Lote encerrado ou cancelado.");
       if (now < new Date(l.starts_at).getTime())
@@ -310,7 +211,7 @@ export class AuctionService {
         placed_at: new Date(now),
         previous_hash: l.head_hash,
       };
-      const hash = this.bidHash(b);
+      const hash = this.integrity.bidHash(b);
       const end =
         new Date(l.ends_at).getTime() - now <= 120000
           ? new Date(now + 120000)
@@ -333,7 +234,7 @@ export class AuctionService {
         "UPDATE lots SET current_amount=$2,leader_id=$3,bid_count=$4,head_hash=$5,ends_at=$6 WHERE id=$1",
         [lotId, amount, userId, b.sequence, hash, end],
       );
-      await this.saveCheckpoint(tx, lotId);
+      await this.integrity.saveCheckpoint(tx, lotId);
       return { accepted: true, endsAt: iso(end) };
     });
   }
@@ -342,7 +243,7 @@ export class AuctionService {
       await this.user(tx, userId, "seller");
       await this.settleInside(tx);
       const l = await this.lot(tx, lotId);
-      await this.requireIntegrity(tx, l);
+      await this.integrity.requireIntegrity(tx, l);
       if (l.seller_id !== userId)
         throw new DomainError("Sem permissão para este lote.", 403);
       if (l.bid_count)
@@ -350,7 +251,7 @@ export class AuctionService {
       if (l.status !== "open")
         throw new DomainError("Este lote já foi encerrado ou cancelado.");
       await tx.query("UPDATE lots SET status='cancelled' WHERE id=$1", [lotId]);
-      await this.saveCheckpoint(tx, lotId);
+      await this.integrity.saveCheckpoint(tx, lotId);
     });
   }
   async settle() {
@@ -404,7 +305,7 @@ export class AuctionService {
     return this.db.transaction(async (tx) => {
       await this.settleInside(tx);
       const l = await this.lot(tx, id);
-      const audit = await this.auditData(tx, l);
+      const audit = await this.integrity.auditData(tx, l);
       const ranks = await tx.query(
         "SELECT bidder_id, MAX(amount) AS amount FROM bids WHERE lot_id=$1 GROUP BY bidder_id ORDER BY MAX(amount) DESC",
         [id],
@@ -425,7 +326,7 @@ export class AuctionService {
       return {
         lotId: id,
         title: l.item.title,
-        ...(await this.auditData(tx, l)),
+        ...(await this.integrity.auditData(tx, l)),
       };
     });
   }
@@ -433,7 +334,7 @@ export class AuctionService {
     return this.db.transaction(async (tx) => {
       await this.settleInside(tx);
       const l = await this.lot(tx, id);
-      await this.requireIntegrity(tx, l);
+      await this.integrity.requireIntegrity(tx, l);
       if (!l.receipt)
         throw new DomainError(
           "Este lote não possui comprovante de arremate.",

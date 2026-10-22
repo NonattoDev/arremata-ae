@@ -39,7 +39,7 @@ Nota fiscal, revenda, app nativo, recuperação de senha, pagamentos reais.
 
 ## Plano de execução
 
-1. Estrutura Next.js/HeroUI/TypeScript, esquema SQL e adapter PostgreSQL; PGlite (PostgreSQL WASM) apenas para desenvolvimento/testes locais.
+1. Estrutura Next.js/HeroUI/TypeScript, schema e migrations Prisma e adapter PostgreSQL; PGlite (PostgreSQL WASM) apenas para desenvolvimento/testes locais.
 2. Testes de domínio e integração SQL antes das implementações críticas.
 3. Serviços transacionais de carteira, lotes, lances, liquidação, comprovantes e auditoria.
 4. Autenticação e endpoints, integração com catálogo e seed.

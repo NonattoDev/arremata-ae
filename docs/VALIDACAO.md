@@ -25,3 +25,13 @@ As capturas locais ficam em `output/playwright/`, ignoradas pelo Git para não p
 - Revisão final do candidato, entendimento das decisões, preenchimento do relato de IA e submissão explícita do formulário.
 
 Não interpretar “implementado” ou “teste local passou” como prova de funcionamento em produção ou de aprovação no processo seletivo.
+
+## Refatoração de arquitetura — 22/10/2026
+
+- Telas/componentes/hooks separados; rotas explícitas do App Router e sessão compartilhada. CSS dividido preservando todas as regras (comparação normalizada contra HEAD anterior).
+- Mutações da UI via Server Actions; commands compartilhados com HTTP. Prisma 7 com schema, relações, migration inicial e adapter PostgreSQL transacional.
+- prisma validate, typecheck, 12 testes e build aprovados. npm audit --omit=dev sem vulnerabilidades.
+- Teste Prisma → pg → TCP → PGlite: persistência de lote/lance, rollback, liquidação repetida e auditoria intacta. Não é prova de concorrência PostgreSQL multi-instância.
+- Navegador integrado: login Ana por Action; depósito simulado de R$1 (saldo 5010 → 5011); lance R$120 aceito, liderança e saldo disponível R$4891. Captura local em output/playwright/server-action-wallet.png (ignorada no Git).
+- Revisão independente sem achados P1/P2 nas Actions, permissões, adapter e rotas/sessão.
+- Vercel, PostgreSQL hospedado e cron sem navegador permanecem pendentes.

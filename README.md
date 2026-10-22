@@ -8,7 +8,7 @@ Primeira implementação local. **Publicação e validação em produção ainda
 
 ## Stack
 
-Next.js 16 App Router, React 19, TypeScript, HeroUI 3 e Tailwind CSS 4. Back-end Node.js nos Route Handlers do próprio Next.js. PostgreSQL via `pg` em produção; PGlite (PostgreSQL WASM) para desenvolvimento/testes locais. Autenticação com scrypt, sessões opacas armazenadas por hash e cookies HttpOnly/SameSite, Secure em produção. Zod valida entradas; escritas verificam origem e tentativas são limitadas no banco.
+Next.js 16 App Router, React 19, TypeScript, HeroUI 3 e Tailwind CSS 4. Back-end Node.js com Server Actions para mutações e Route Handlers para consultas/polling e compatibilidade HTTP. PostgreSQL via Prisma 7 e adapter `pg` em produção; PGlite (PostgreSQL WASM) para desenvolvimento/testes locais. Autenticação com scrypt, sessões opacas armazenadas por hash e cookies HttpOnly/SameSite, Secure em produção. Zod valida entradas; escritas verificam origem e tentativas são limitadas no banco.
 
 ## Executar
 
@@ -45,7 +45,7 @@ O seed importa três obras reais: duas abertas e uma agendada. Não duplica lote
 
 ### PostgreSQL convencional
 
-Defina `DATABASE_URL` e execute `npm run db:setup`. O esquema idempotente está em `src/server/schema.ts`. Use base exclusiva e usuário com permissão para criar tabelas/índices. Configure SSL na URL conforme o provedor, sem desabilitar validação de certificado.
+Defina `DATABASE_URL`, execute `npm run db:migrate` e depois `npm run db:setup` (seed). O modelo está em `prisma/schema.prisma`, e as migrations versionadas em `prisma/migrations`. `npm ci` gera o cliente Prisma; `npm run db:generate` regenera após mudanças. Em desenvolvimento PostgreSQL, use `npm run db:migrate:dev` para criar novas migrations. O seed não cria tabelas em PostgreSQL remoto. Use base exclusiva e usuário com permissão para criar tabelas/índices. Configure SSL na URL conforme o provedor, sem desabilitar validação de certificado.
 
 ## Regras implementadas
 
@@ -81,7 +81,7 @@ Dados e JPEG da obra são copiados para PostgreSQL ao publicar. Vitrine, sala, a
 
 ## Vercel
 
-1. Criar PostgreSQL exclusivo, configurar `DATABASE_URL` e executar setup/seed.
+1. Criar PostgreSQL exclusivo, configurar `DATABASE_URL`, executar `npm run db:migrate` e depois `npm run db:setup`.
 2. Importar **NonattoDev/arremata-ae** na conta autorizada, framework Next.js; `npm ci` e `npm run build`.
 3. Configurar `DATABASE_URL`, `AUDIT_SECRET`, `CRON_SECRET`, `APP_URL=https://seu-dominio` como variáveis protegidas de produção. `DEMO_PASSWORD` só é necessária no setup.
 4. Usar banco separado para preview, nunca produção em previews de código não confiável.
@@ -97,16 +97,22 @@ npm run typecheck
 npm run build
 ```
 
-Testes executam SQL em PGlite e cobrem limites, papéis, saldo entre lotes, concorrência local, anti-sniping, liquidação, cancelamento, privacidade e adulteração direta no SQL. **Não substituem concorrência entre conexões PostgreSQL reais.** Evidências/pendências em `docs/VALIDACAO.md`.
+Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre lotes, concorrência local, anti-sniping, liquidação, cancelamento, privacidade e adulteração direta no SQL. Um teste adicional percorre Prisma → pg → protocolo PostgreSQL → PGlite para comprovar persistência, rollback, liquidação e auditoria. **Não substituem concorrência entre conexões PostgreSQL reais.** Evidências/pendências em `docs/VALIDACAO.md`.
 
 ## Organização e uso de IA
 
-- `src/server/auction.ts`: regras e auditoria.
-- `src/server/database.ts`: adaptadores PostgreSQL/PGlite.
-- `src/server/security.ts`: senhas/sessões/limites.
-- `src/server/catalog.ts`: API e imagens.
-- `src/app/api/[...path]/route.ts`: endpoints e validação.
-- `src/components/auction-app.tsx`: telas/polling.
+- `src/app`: rotas explícitas do App Router e composição de layout.
+- `src/features`: telas separadas por funcionalidade.
+- `src/components`: componentes reutilizáveis, layout e provider de sessão.
+- `src/hooks`, `src/lib`, `src/types`: polling, formatação/transporte e contratos.
+- `src/server/actions`: entradas de mutação chamadas pela interface.
+- `src/server/commands`: validação/autorização compartilhada pelas Actions e HTTP.
+- `src/server/auction.ts`: operações transacionais de mercado; `domain/audit.ts`: integridade HMAC.
+- `src/server/database`: adapters Prisma/PostgreSQL e PGlite.
+- `src/server/security.ts`: senhas/sessões/limites; `catalog.ts`: API e imagens.
+- `prisma/schema.prisma`: modelos e relações; `prisma/migrations`: SQL versionado.
+- `src/styles`: estilos separados por funcionalidade e viewport.
+- `docs/ARQUITETURA.md`: responsabilidades, limites e decisões.
 - `docs/REQUISITOS.md`: rastreabilidade do PDF.
 
 Desenvolvido com assistência do Codex para estrutura, código, testes, documentação e revisão. Foram conferidas regras contra o PDF, executadas verificações e corrigidos achados de revisão. Não se afirma revisão manual do candidato ainda não realizada: antes de enviar, Robson deve revisar/compreender a solução e ajustar o relato à participação real.

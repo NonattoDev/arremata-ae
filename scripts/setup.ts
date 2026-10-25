@@ -1,57 +1,58 @@
-import { database } from "../src/server/database";
-import { schema } from "../src/server/schema";
-import { AuctionService } from "../src/server/auction";
-import { hashPassword } from "../src/server/security";
-import { importArt } from "../src/server/catalog";
+import { bancoDados } from "../src/servidor/banco";
+import { esquema } from "../src/servidor/esquema";
+import { ServicoLeiloes } from "../src/servidor/leilao";
+import { gerarHashSenha } from "../src/servidor/seguranca";
+import { importarObra } from "../src/servidor/catalogo";
 
-async function main() {
-  const db = await database();
+async function principal() {
+  const banco = await bancoDados();
   try {
-    // Production schema is applied by Prisma Migrate, never implicitly by seed.
-    if (!process.env.DATABASE_URL) await db.query(schema);
-    const password = process.env.DEMO_PASSWORD;
-    if (!password || password.length < 12)
+    // Em produção, Prisma Migrate prepara o esquema; o seed só insere os dados iniciais.
+    if (!process.env.DATABASE_URL) await banco.busca(esquema);
+    const senha = process.env.DEMO_PASSWORD;
+    if (!senha || senha.length < 12)
       throw new Error("Defina DEMO_PASSWORD com pelo menos 12 caracteres.");
-    const service = new AuctionService(db, process.env.AUDIT_SECRET || "");
-    const users: Record<string, string> = {};
-    for (const [email, name, role] of [
+    const servico = new ServicoLeiloes(banco, process.env.AUDIT_SECRET || "");
+    const usuarios: Record<string, string> = {};
+    for (const [email, nome, papel] of [
       ["leiloeiro@arremata.test", "Galeria aê", "seller"],
       ["ana@arremata.test", "Ana", "bidder"],
       ["bruno@arremata.test", "Bruno", "bidder"],
     ] as const) {
-      const [existing] = await db.query("SELECT id FROM users WHERE email=$1", [
-        email,
-      ]);
-      users[role === "seller" ? "seller" : name] =
-        existing?.id ||
-        (await service.createUser(
+      const [existente] = await banco.busca(
+        "SELECT id FROM users WHERE email=$1",
+        [email],
+      );
+      usuarios[papel === "seller" ? "seller" : nome] =
+        existente?.id ||
+        (await servico.criarUsuario(
           email,
-          name,
-          await hashPassword(password),
-          role,
+          nome,
+          await gerarHashSenha(senha),
+          papel,
         ));
-      if (!existing && role === "bidder")
-        await service.deposit(users[name], 500000);
+      if (!existente && papel === "bidder")
+        await servico.depositar(usuarios[nome], 500000);
     }
-    const [active] = await db.query(
+    const [ativo] = await banco.busca(
       "SELECT id FROM lots WHERE status='open' AND ends_at > now() LIMIT 1",
     );
-    if (!active) {
-      for (const [index, externalId] of [
+    if (!ativo) {
+      for (const [indice, idExterno] of [
         "136510",
         "95272",
         "135382",
       ].entries()) {
-        const item = await importArt(externalId);
-        await service.createLot(users.seller, {
+        const item = await importarObra(idExterno);
+        await servico.criarLote(usuarios.seller, {
           item,
-          initial: (index + 1) * 10000,
+          initial: (indice + 1) * 10000,
           increment: 1000,
           startsAt: new Date(
-            Date.now() + (index === 2 ? 86400000 : -60000),
+            Date.now() + (indice === 2 ? 86400000 : -60000),
           ).toISOString(),
           endsAt: new Date(
-            Date.now() + (index + 1) * 7 * 86400000,
+            Date.now() + (indice + 1) * 7 * 86400000,
           ).toISOString(),
         });
       }
@@ -60,10 +61,10 @@ async function main() {
       "Banco preparado: leiloeiro@arremata.test, ana@arremata.test, bruno@arremata.test. Senha: a definida em DEMO_PASSWORD.",
     );
   } finally {
-    await db.close();
+    await banco.fechar();
   }
 }
-main().catch((error) => {
-  console.error(error.message);
+principal().catch((erro) => {
+  console.error(erro.message);
   process.exitCode = 1;
 });

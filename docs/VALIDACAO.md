@@ -78,3 +78,67 @@ Não interpretar “implementado” ou “teste local passou” como prova de fu
 ### Publicação da revisão auditada
 
 Commit 8b425bf publicado no GitHub pessoal e deploy Vercel dpl_D7byTETGeiRUuF6LXER15bosWMUV confirmado READY. Smoke HTTP autenticado público aprovado: três logins, autorização, depósito simulado, API real, lances, posição, auditoria e imagem. Lote do smoke: 2d86dc11-98c7-4c20-a1e2-8c8896942463. Comprovante de lote encerrado conferido sem login no navegador, com alias e R$110. Há lote aberto até 05/11/2026. Essas verificações não substituem a revisão móvel nem a revisão pessoal do candidato.
+
+## Refatoração PT-BR, SWR e Day.js — validação local em 22/10/2026
+
+- Componentes, funcionalidades, serviços, ações e modelos Prisma passaram a usar nomes em português. Contratos externos, colunas físicas e conteúdo assinado foram preservados.
+- `npm run check`: TypeScript, 16 testes e build aprovados. `npm run db:validate`: schema válido. Não houve reset nem migração física do banco.
+- Smoke HTTP local aprovado: login, cookie HttpOnly, CSRF, papéis, depósito, importação, lances, posição, auditoria e imagem persistida. Lote criado: `a08f8fcc-c562-4855-9482-f19f61986a98`.
+- No navegador integrado: saída do leiloeiro, entrada como Ana, carteira e depósito simulado de R$ 1 pela Server Action com atualização do saldo; saída e entrada como Bruno com carteira distinta. Consultas usam SWR com escopo por usuário.
+- Histórico anterior à refatoração `0aa7da8c-0b36-45bb-afc6-a2f96caa17a4` continuou exibindo “Histórico íntegro”.
+- Transição de página usa Web Animations em Card HeroUI e respeita movimento reduzido por implementação. Não houve validação manual da preferência do sistema nem nova revisão mobile nesta rodada.
+- Esta rodada está no código local; as evidências de produção anteriores não comprovam publicação desta refatoração.
+
+## Fontes e Motion — validação local em 22/10/2026
+
+- Motion instalado; Manrope e Sora configuradas em next/font.
+- npm run check: TypeScript, 16 testes e build aprovados.
+- Navegador integrado confirmou fontes carregadas: Manrope no corpo, Sora no título e marca.
+- Foco por teclado acionou o símbolo; transformação intermediária observada, confirmando movimento real. Preferência de movimento reduzido tratada no hook, sem alteração da configuração do sistema nesta validação.
+- Alteração local, sem publicação nesta rodada.
+
+## Fechamento visual e revisão responsiva — 24/10/2026, local
+
+- Navegador integrado, com viewport explícito: 360×800, 390×844, 768×1024 e 1366×900. Não é teste em aparelho físico ou Safari/iOS.
+- Navbar mobile em uma linha, menu com navegação por perfil, tema e saída. Início e catálogo mantêm margens; obras preservam proporção. Fontes Manrope/Sora e animação da marca mantidas.
+- Sala separa área de disputa dos dados da obra, com preço destacado. Carteira separa total, comprometido e disponível. Formulários recebem espaçamento consistente; resultados da API têm área de rolagem e confirmação da obra selecionada.
+- Auditoria quebra checkpoint longo. Histórico tem rolagem horizontal e foco por teclado: em 360 px, largura visível 273 px, conteúdo 386 px e scrollLeft avançou com ArrowRight. Não houve aumento da largura do documento nas medições da sala, carteira, comprovante, auditoria e início.
+- Cadastro sintético de licitante pela interface concluído; login do leiloeiro e de Ana, logout e menus por perfil conferidos. Sessão inicial de Bruno participou da disputa.
+- Carteira: depósito de R$1, total de R$4670 para R$4671. Lance de Bruno de R$130 atualizou histórico, liderança e disponível para R$4541; Ana viu posição 2, deu R$140 e passou à posição 1, com disponível de R$4903. Valores locais de teste.
+- Leiloeiro buscou Monet na API, selecionou Spring Flowers e publicou lote agendado 02e601c8-0095-4008-8ba8-64d92074c940. Painel exibiu o lote e cancelamento sem lances funcionou. Ajustado texto do prazo cancelado para não apresentar data futura como encerramento já ocorrido.
+- Comprovante a08f8fcc-c562-4855-9482-f19f61986a98 aberto sem login; cópia retornou o endereço correto. Auditoria pública exibiu histórico íntegro e aliases, sem e-mails/nome dos licitantes.
+- Tema claro/escuro exercitado no menu; comprovante e auditoria inspecionados em tema escuro.
+- npm run check: 16 testes, TypeScript e build aprovados; npm run db:validate: schema válido. Após ajustes finais de tabela, prazo cancelado e imagem de destaque, TypeScript e build reexecutados com sucesso.
+- Smoke HTTP local aprovado: três logins, HttpOnly, CSRF, papéis, depósito, importação, regras de lance, posição após ser superado, auditoria pública e imagem persistida. Lote 8664e170-43dd-4b59-a634-0e850ec34281.
+- Capturas locais: .local/revisao-desktop-24out.png e .local/revisao-mobile-24out.png. Dados e capturas de avaliação não integram o deploy.
+- Revisão ainda local: não houve commit, push, deploy ou submissão do formulário nesta rodada. Vercel/Neon não foram alterados. A revisão pessoal do candidato permanece pendente.
+
+## Mural, ícones e acompanhamento — 24/10/2026, local
+
+- Google Material Symbols Rounded hospedados no projeto (subconjunto TTF de 10.704 bytes e licença Apache 2.0). Ícones reutilizáveis em navegação, saída, tema, autenticação, carteira, lotes, auditoria e comprovantes. Marca com Bricolage Grotesque.
+- Indicador ao vivo com pulso suave; preferência de movimento reduzido desativa a animação. Sala reorganizada em galeria, disputa e histórico; formulário de lance separado em componente.
+- Mural HeroUI abre ao clicar nas obras no início, catálogo e sala. Obra completa e três recortes identificados da mesma reprodução; não são fotografias adicionais. Seleção do detalhe central e fechamento conferidos no navegador, incluindo 390×844.
+- Miniplayer global: até cinco IDs de lotes, seleção e estado recolhido persistidos neste navegador por conta. Preços, posição e prazo vêm do servidor via SWR; valores financeiros não são persistidos no localStorage. Falha de atualização exibe aviso de dados da última consulta. Não há sincronização da seleção entre dispositivos.
+- Navegação início → carteira → sala e recarga mantiveram dois lotes; terceiro incluído na sala. Recolher/expandir preservou seleção. Lance local de Ana de R$300 no Red Kerchief atualizou histórico, liderança e painel, disponível de R$4903 para R$4603.
+- Limite de cinco, duplicatas, substituição após remoção e armazenamento inválido cobertos por testes automatizados. Interface exercitada com três lotes ativos, não com cinco.
+- Revisão em 360×800, 390×844 e 1366×900. Em 360 px, documento com 345 px, sem rolagem horizontal; menu compacto mantém navbar em uma linha. Modal e painel com rolagem própria. Console da inspeção final sem erros.
+- npm run check: TypeScript, 18 testes e build aprovados. Ajustes posteriores limitados ao plural de lances e menu compacto; TypeScript revalidado.
+- Evidências locais: .local/sala-miniplayer-24out.png e .local/miniplayer-mobile-24out.png. Sem commit, push, deploy ou submissão nesta rodada.
+
+## Cadastro, login e logout mobile — 24/10/2026
+
+- Fluxo real pela interface local no navegador integrado: cadastro de licitante sintético Teste Mobile Completo, logout, tentativa de acesso a /meus-lotes (redirecionou para /entrar), login com senha incorreta (recusado), login correto, acesso à área privada e segundo logout.
+- Viewports: cadastro 390×844; login e área privada 360×800. Não é teste em aparelho físico. Área privada com largura do documento igual a 360 px, sem rolagem horizontal.
+- Sugestões após @: cinco domínios; clique em Gmail completou endereço, prefixo ic filtrou iCloud, Escape ocultou sugestões. No login, out filtrou Outlook e clique completou. Cadastro efetivo usou domínio example.com para não associar o teste a uma caixa real.
+- Regras e confirmação ocultas antes da digitação. Senha curta exibiu regra não atendida. Confirmação diferente bloqueou o cadastro; confirmação igual permitiu criação. Olhos mudaram password/text independentemente no cadastro, e nos dois sentidos no login; o cadastro e login posteriores confirmaram preservação dos valores.
+- Console da área privada sem erros na inspeção; npm run check aprovado: 19 testes, TypeScript e build.
+- Evidência: .local/fluxo-mobile-autenticado-24out.png. Conta sintética permanece no banco local; sessão encerrada ao final. Nenhum deploy ou dado de produção alterado.
+
+## Revalidação dos obrigatórios — 25/10/2026
+
+- npm run check aprovado: TypeScript, 26 testes e build de produção. npm run db:validate aprovado.
+- Smoke HTTP local aprovado com as três contas sintéticas: login/HttpOnly, origem inválida, papéis, depósito, importação pública, persistência de imagem, mínimos de lance, liderança, superação/posição e auditoria sem e-mails. Lote criado: da8de430-67bb-43b8-97f5-a578a787adce. O teste adicionou R$ 10 simulados à Ana e criou dois lances nesse lote exclusivo de validação.
+- Navegador integrado em 393×852: sala autenticada como Ana, segundo lugar após lance de Bruno, contador com segundos e saldo disponível. Não é teste em aparelho físico.
+- Perfil adicional (não exigido pelo PDF): nome/CPF gravados juntos; CPF inválido não grava nome; documento existente não pode ser sobrescrito. Foto/avatares, troca de senha e isolamento entre usuários cobertos por testes.
+- Consulta da Vercel: projeto arremata-ae em NatosTech, produção READY dpl_BJESYKQNJb7jDz5zN9B31WaoFDwp, commit d15ac481. Catálogo público respondeu HTTP 200 com três lotes ao vivo. Isso confirma a versão antiga, não a revisão local.
+- Prisma migrate status no Neon confirmou duas migrations pendentes: avatar_usuario e cpf_usuario. Ambas apenas acrescentam colunas opcionais; não removem registros nem alteram o segredo da auditoria.

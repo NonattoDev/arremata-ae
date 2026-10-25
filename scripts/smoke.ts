@@ -1,55 +1,55 @@
 import assert from "node:assert/strict";
 
-// Opt-in smoke test. Creates demo lots/deposits on the explicitly selected target.
+// Verificação explícita: cria lotes e depósitos simulados no endereço selecionado.
 const base = process.env.SMOKE_BASE_URL || "http://localhost:4168";
-const password = process.env.DEMO_PASSWORD;
-if (!password)
+const senha = process.env.DEMO_PASSWORD;
+if (!senha)
   throw new Error("Defina DEMO_PASSWORD no arquivo de ambiente do destino.");
-async function call(
-  path: string,
-  body?: unknown,
+async function chamar(
+  caminho: string,
+  corpo?: unknown,
   cookie?: string,
-  origin = base,
+  origem = base,
 ) {
-  const response = await fetch(`${base}/api/${path}`, {
-    method: body === undefined ? "GET" : "POST",
+  const resposta = await fetch(`${base}/api/${caminho}`, {
+    method: corpo === undefined ? "GET" : "POST",
     headers: {
-      ...(body === undefined
+      ...(corpo === undefined
         ? {}
-        : { "Content-Type": "application/json", Origin: origin }),
+        : { "Content-Type": "application/json", Origin: origem }),
       ...(cookie ? { Cookie: cookie } : {}),
     },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: corpo === undefined ? undefined : JSON.stringify(corpo),
   });
-  return { response, data: await response.json() };
+  return { response: resposta, data: await resposta.json() };
 }
-async function login(email: string) {
-  const r = await call("auth/login", { email, password });
-  assert.equal(r.response.status, 200);
-  assert.match(r.response.headers.get("set-cookie") || "", /HttpOnly/i);
-  return r.response.headers.get("set-cookie")!.split(";")[0];
+async function entrar(email: string) {
+  const resultado = await chamar("auth/login", { email, password: senha });
+  assert.equal(resultado.response.status, 200);
+  assert.match(resultado.response.headers.get("set-cookie") || "", /HttpOnly/i);
+  return resultado.response.headers.get("set-cookie")!.split(";")[0];
 }
-async function main() {
-  const seller = await login("leiloeiro@arremata.test");
-  const ana = await login("ana@arremata.test");
-  const bruno = await login("bruno@arremata.test");
+async function principal() {
+  const leiloeiro = await entrar("leiloeiro@arremata.test");
+  const ana = await entrar("ana@arremata.test");
+  const bruno = await entrar("bruno@arremata.test");
   assert.equal(
-    (await call("wallet", { amount: 100 }, ana, "https://invalid.example"))
+    (await chamar("wallet", { amount: 100 }, ana, "https://invalid.example"))
       .response.status,
     403,
   );
-  assert.equal((await call("wallet")).response.status, 401);
+  assert.equal((await chamar("wallet")).response.status, 401);
   assert.equal(
-    (await call("wallet", { amount: 100 }, seller)).response.status,
+    (await chamar("wallet", { amount: 100 }, leiloeiro)).response.status,
     403,
   );
-  const before = (await call("wallet", undefined, ana)).data.total;
-  await call("wallet", { amount: 1000 }, ana);
+  const antes = (await chamar("wallet", undefined, ana)).data.total;
+  await chamar("wallet", { amount: 1000 }, ana);
   assert.equal(
-    (await call("wallet", undefined, ana)).data.total,
-    before + 1000,
+    (await chamar("wallet", undefined, ana)).data.total,
+    antes + 1000,
   );
-  const created = await call(
+  const criado = await chamar(
     "lots",
     {
       externalId: "136510",
@@ -58,38 +58,38 @@ async function main() {
       startsAt: new Date(Date.now() - 1000).toISOString(),
       endsAt: new Date(Date.now() + 135000).toISOString(),
     },
-    seller,
+    leiloeiro,
   );
-  assert.equal(created.response.status, 201, JSON.stringify(created.data));
-  const id = created.data.id;
-  const first = await call(`lots/${id}/bids`, { amount: 10000 }, ana);
-  assert.equal(first.response.status, 200);
+  assert.equal(criado.response.status, 201, JSON.stringify(criado.data));
+  const id = criado.data.id;
+  const primeiro = await chamar(`lots/${id}/bids`, { amount: 10000 }, ana);
+  assert.equal(primeiro.response.status, 200);
   assert.equal(
-    (await call(`lots/${id}/bids`, { amount: 11000 }, ana)).response.status,
+    (await chamar(`lots/${id}/bids`, { amount: 11000 }, ana)).response.status,
     400,
   );
   assert.equal(
-    (await call(`lots/${id}/bids`, { amount: 10500 }, bruno)).response.status,
+    (await chamar(`lots/${id}/bids`, { amount: 10500 }, bruno)).response.status,
     400,
   );
   assert.equal(
-    (await call(`lots/${id}/bids`, { amount: 11000 }, bruno)).response.status,
+    (await chamar(`lots/${id}/bids`, { amount: 11000 }, bruno)).response.status,
     200,
   );
   assert.equal(
-    (await call(`lots/${id}/cancel`, {}, seller)).response.status,
+    (await chamar(`lots/${id}/cancel`, {}, leiloeiro)).response.status,
     400,
   );
-  const room = (await call(`lots/${id}`, undefined, ana)).data;
-  assert.equal(room.isLeader, false);
-  assert.equal(room.position, 2);
-  const audit = (await call(`audit/${id}`)).data;
-  assert.equal(audit.intact, true);
-  assert.equal(audit.bids.length, 2);
-  assert.ok(!JSON.stringify(audit).includes("@arremata.test"));
-  const image = await fetch(`${base}/api/lots/${id}/image`);
-  assert.equal(image.status, 200);
-  assert.match(image.headers.get("content-type")!, /image/);
+  const sala = (await chamar(`lots/${id}`, undefined, ana)).data;
+  assert.equal(sala.isLeader, false);
+  assert.equal(sala.position, 2);
+  const auditar = (await chamar(`audit/${id}`)).data;
+  assert.equal(auditar.intact, true);
+  assert.equal(auditar.bids.length, 2);
+  assert.ok(!JSON.stringify(auditar).includes("@arremata.test"));
+  const imagem = await fetch(`${base}/api/lots/${id}/image`);
+  assert.equal(imagem.status, 200);
+  assert.match(imagem.headers.get("content-type")!, /image/);
   console.log(
     JSON.stringify({
       ok: true,
@@ -106,11 +106,11 @@ async function main() {
         "public audit",
         "stored image",
       ],
-      closesAt: (await call(`lots/${id}`)).data.endsAt,
+      closesAt: (await chamar(`lots/${id}`)).data.endsAt,
     }),
   );
 }
-main().catch((error) => {
-  console.error(error.message);
+principal().catch((erro) => {
+  console.error(erro.message);
   process.exitCode = 1;
 });

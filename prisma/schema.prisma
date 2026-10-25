@@ -7,97 +7,99 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Role is constrained to seller/bidder by the migration CHECK constraint.
-model User {
-  id           String        @id
-  email        String        @unique
-  name         String
-  passwordHash String        @map("password_hash")
-  role         String
-  alias        String        @unique
-  balance      BigInt        @default(0)
-  sessions     Session[]
-  offeredLots  Lot[]         @relation("Seller")
-  leadingLots  Lot[]         @relation("Leader")
-  bids         Bid[]
-  ledger       LedgerEntry[]
+/// O papel é limitado a seller/bidder pela restrição CHECK da migration.
+model Usuario {
+  id             String         @id
+  email          String         @unique
+  nome           String         @map("name")
+  avatar         String?
+  cpf            String?
+  hashSenha      String         @map("password_hash")
+  papel          String         @map("role")
+  apelido        String         @unique @map("alias")
+  saldo          BigInt         @default(0) @map("balance")
+  sessoes        Sessao[]
+  lotesOfertados Lote[]         @relation("Seller")
+  lotesLiderados Lote[]         @relation("Leader")
+  lances         Lance[]
+  movimentacoes  Movimentacao[]
 
   @@map("users")
 }
 
-model Session {
-  tokenHash String   @id @map("token_hash")
-  userId    String   @map("user_id")
-  expiresAt DateTime @map("expires_at") @db.Timestamptz
-  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+model Sessao {
+  hashToken String   @id @map("token_hash")
+  idUsuario String   @map("user_id")
+  expiraEm  DateTime @map("expires_at") @db.Timestamptz
+  usuario   Usuario  @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("sessions")
 }
 
-/// Item contains the immutable external metadata and cached image snapshot.
-/// Monetary values are integer cents; CHECK constraints live in the migration.
-model Lot {
-  id            String        @id
-  sellerId      String        @map("seller_id")
-  item          Json          @db.JsonB
-  initial       BigInt
-  increment     BigInt
-  startsAt      DateTime      @map("starts_at") @db.Timestamptz
-  endsAt        DateTime      @map("ends_at") @db.Timestamptz
-  status        String        @default("open")
-  currentAmount BigInt        @default(0) @map("current_amount")
-  leaderId      String?       @map("leader_id")
-  bidCount      Int           @default(0) @map("bid_count")
-  headHash      String        @map("head_hash")
-  checkpoint    String
-  receipt       Json?         @db.JsonB
-  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  seller        User          @relation("Seller", fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  leader        User?         @relation("Leader", fields: [leaderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  bids          Bid[]
-  ledger        LedgerEntry[]
+/// O item guarda os metadados e a imagem copiados da API.
+/// Valores monetários ficam em centavos inteiros; restrições CHECK estão na migration.
+model Lote {
+  id               String         @id
+  idLeiloeiro      String         @map("seller_id")
+  item             Json           @db.JsonB
+  valorInicial     BigInt         @map("initial")
+  incremento       BigInt         @map("increment")
+  inicioEm         DateTime       @map("starts_at") @db.Timestamptz
+  fimEm            DateTime       @map("ends_at") @db.Timestamptz
+  situacao         String         @default("open") @map("status")
+  valorAtual       BigInt         @default(0) @map("current_amount")
+  idLider          String?        @map("leader_id")
+  quantidadeLances Int            @default(0) @map("bid_count")
+  hashFinal        String         @map("head_hash")
+  pontoVerificacao String         @map("checkpoint")
+  comprovante      Json?          @map("receipt") @db.JsonB
+  criadoEm         DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  leiloeiro        Usuario        @relation("Seller", fields: [idLeiloeiro], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lider            Usuario?       @relation("Leader", fields: [idLider], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lances           Lance[]
+  movimentacoes    Movimentacao[]
 
-  @@index([status, endsAt], map: "lots_due")
+  @@index([situacao, fimEm], map: "lots_due")
   @@map("lots")
 }
 
-model Bid {
+model Lance {
   id           String   @id
-  lotId        String   @map("lot_id")
-  bidderId     String   @map("bidder_id")
-  alias        String
-  amount       BigInt
-  sequence     Int
-  placedAt     DateTime @map("placed_at") @db.Timestamptz
-  previousHash String   @map("previous_hash")
+  idLote       String   @map("lot_id")
+  idLicitante  String   @map("bidder_id")
+  apelido      String   @map("alias")
+  valor        BigInt   @map("amount")
+  sequencia    Int      @map("sequence")
+  registradoEm DateTime @map("placed_at") @db.Timestamptz
+  hashAnterior String   @map("previous_hash")
   hash         String
-  lot          Lot      @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  bidder       User     @relation(fields: [bidderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lote         Lote     @relation(fields: [idLote], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  licitante    Usuario  @relation(fields: [idLicitante], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([lotId, sequence], map: "bids_lot_id_sequence_key")
-  @@index([lotId, sequence], map: "bids_lot")
-  @@index([bidderId, lotId], map: "bids_user")
+  @@unique([idLote, sequencia], map: "bids_lot_id_sequence_key")
+  @@index([idLote, sequencia], map: "bids_lot")
+  @@index([idLicitante, idLote], map: "bids_user")
   @@map("bids")
 }
 
-model LedgerEntry {
+model Movimentacao {
   id        String   @id
-  userId    String   @map("user_id")
-  lotId     String?  @map("lot_id")
-  amount    BigInt
-  kind      String
-  createdAt DateTime @map("created_at") @db.Timestamptz
-  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lot       Lot?     @relation(fields: [lotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  idUsuario String   @map("user_id")
+  idLote    String?  @map("lot_id")
+  valor     BigInt   @map("amount")
+  tipo      String   @map("kind")
+  criadoEm  DateTime @map("created_at") @db.Timestamptz
+  usuario   Usuario  @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lote      Lote?    @relation(fields: [idLote], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@unique([userId, lotId, kind], map: "ledger_user_id_lot_id_kind_key")
+  @@unique([idUsuario, idLote, tipo], map: "ledger_user_id_lot_id_kind_key")
   @@map("ledger")
 }
 
-model RateLimit {
-  key      String   @id
-  hits     Int
-  resetsAt DateTime @map("resets_at") @db.Timestamptz
+model LimiteTentativas {
+  chave      String   @id @map("key")
+  tentativas Int      @map("hits")
+  reiniciaEm DateTime @map("resets_at") @db.Timestamptz
 
   @@map("rate_limits")
 }

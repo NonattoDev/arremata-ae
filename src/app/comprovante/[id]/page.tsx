@@ -1,9 +1,9 @@
-import { Receipt } from "@/features/receipts/receipt-page";
-export default async function Page({
-  params,
+import { Comprovante } from "@/funcionalidades/comprovantes/comprovante";
+export default async function Pagina({
+  params: parametros,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  return <Receipt id={id} />;
+  const { id } = await parametros;
+  return <Comprovante id={id} />;
 }

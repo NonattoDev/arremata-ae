@@ -1,57 +1,57 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createLocalDatabase } from "../src/server/database";
-import { AuctionService, DomainError } from "../src/server/auction";
-import { schema } from "../src/server/schema";
-import { deposit, createLot } from "../src/server/commands/market";
-import type { CommandContext } from "../src/server/commands/context";
+import { criarBancoLocal } from "../src/servidor/banco";
+import { ServicoLeiloes, ErroDominio } from "../src/servidor/leilao";
+import { esquema } from "../src/servidor/esquema";
+import { depositar, criarLote } from "../src/servidor/comandos/mercado";
+import type { ContextoComando } from "../src/servidor/comandos/contexto";
 import { ZodError } from "zod";
 
-test("shared action commands reject missing identity, wrong role and malformed amounts", async () => {
-  const db = await createLocalDatabase();
+test("comandos das Actions recusam ausência de sessão, papel incorreto e valores inválidos", async () => {
+  const banco = await criarBancoLocal();
   try {
-    await db.query(schema);
-    const service = new AuctionService(
-      db,
+    await banco.busca(esquema);
+    const servico = new ServicoLeiloes(
+      banco,
       "commands-test-secret-with-at-least-32-characters",
     );
-    const context: CommandContext = {
-      db,
-      service,
+    const contexto: ContextoComando = {
+      db: banco,
+      service: servico,
       token: undefined,
       user: undefined,
     };
-    const status = (expected: number) => (error: unknown) =>
-      error instanceof DomainError && error.status === expected;
-    await assert.rejects(deposit(context, { amount: 100 }), status(401));
-    const sellerId = await service.createUser(
+    const status = (esperado: number) => (erro: unknown) =>
+      erro instanceof ErroDominio && erro.status === esperado;
+    await assert.rejects(depositar(contexto, { amount: 100 }), status(401));
+    const sellerId = await servico.criarUsuario(
       "seller@commands.test",
       "Seller",
       "test",
       "seller",
     );
-    context.user = {
+    contexto.user = {
       id: sellerId,
       name: "Seller",
       email: "seller@commands.test",
       alias: "Seller",
       role: "seller",
     };
-    await assert.rejects(deposit(context, { amount: 100 }), status(403));
-    const bidderId = await service.createUser(
+    await assert.rejects(depositar(contexto, { amount: 100 }), status(403));
+    const bidderId = await servico.criarUsuario(
       "bidder@commands.test",
       "Bidder",
       "test",
       "bidder",
     );
-    context.user = { ...context.user, id: bidderId, role: "bidder" };
-    await assert.rejects(createLot(context, {}), status(403));
-    await assert.rejects(deposit(context, { amount: -1 }), ZodError);
-    // Caller-supplied identity is ignored; only the verified context can receive funds.
-    await deposit(context, { amount: 100, userId: sellerId });
-    assert.equal((await service.wallet(bidderId)).total, 100);
-    assert.equal((await service.wallet(sellerId)).total, 0);
+    contexto.user = { ...contexto.user, id: bidderId, role: "bidder" };
+    await assert.rejects(criarLote(contexto, {}), status(403));
+    await assert.rejects(depositar(contexto, { amount: -1 }), ZodError);
+    // A identidade enviada pelo cliente é ignorada; o crédito pertence à sessão verificada.
+    await depositar(contexto, { amount: 100, userId: sellerId });
+    assert.equal((await servico.carteira(bidderId)).total, 100);
+    assert.equal((await servico.carteira(sellerId)).total, 0);
   } finally {
-    await db.close();
+    await banco.fechar();
   }
 });

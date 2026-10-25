@@ -1,9 +1,9 @@
-import { LotRoom } from "@/features/auctions/lot-room";
-export default async function Page({
-  params,
+import { SalaLote } from "@/funcionalidades/leiloes/sala-lote";
+export default async function Pagina({
+  params: parametros,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-  return <LotRoom id={id} />;
+  const { id } = await parametros;
+  return <SalaLote id={id} />;
 }

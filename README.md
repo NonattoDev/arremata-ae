@@ -104,16 +104,16 @@ Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplic
 ## Organização e uso de IA
 
 - `src/app`: rotas explícitas do App Router e composição de layout.
-- `src/features`: telas separadas por funcionalidade.
-- `src/components`: componentes reutilizáveis, layout e provider de sessão.
-- `src/hooks`, `src/lib`, `src/types`: polling, formatação/transporte e contratos.
-- `src/server/actions`: entradas de mutação chamadas pela interface.
-- `src/server/commands`: validação/autorização compartilhada pelas Actions e HTTP.
-- `src/server/auction.ts`: operações transacionais de mercado; `domain/audit.ts`: integridade HMAC.
-- `src/server/database`: adapters Prisma/PostgreSQL e PGlite.
-- `src/server/security.ts`: senhas/sessões/limites; `catalog.ts`: API e imagens.
+- `src/funcionalidades`: telas separadas por funcionalidade.
+- `src/componentes`: componentes reutilizáveis, layout e provider de sessão.
+- `src/hooks`, `src/lib`, `src/tipos`: polling, formatação/transporte e contratos.
+- `src/servidor/actions`: entradas de mutação chamadas pela interface.
+- `src/servidor/comandos`: validação/autorização compartilhada pelas Actions e HTTP.
+- `src/servidor/leilao.ts`: operações transacionais de mercado; `dominio/auditoria.ts`: integridade HMAC.
+- `src/servidor/banco`: adapters Prisma/PostgreSQL e PGlite.
+- `src/servidor/seguranca.ts`: senhas/sessões/limites; `catalogo.ts`: API e imagens.
 - `prisma/schema.prisma`: modelos e relações; `prisma/migrations`: SQL versionado.
-- Interface com componentes e aparência nativa HeroUI. `globals.css` importa apenas Tailwind e HeroUI; utilitários de layout/responsividade e exceção autorizada de transparência, borda, sombra e blur na navbar glass. Obras usam `ArtworkImage` com Next/Image.
+- Interface com componentes e aparência nativa HeroUI. `globals.css` importa apenas Tailwind e HeroUI; utilitários de layout/responsividade e exceção autorizada de transparência, borda, sombra e blur na navbar glass. Obras usam `ImagemObra` com Next/Image.
 - `docs/ARQUITETURA.md`: responsabilidades, limites e decisões.
 - `docs/REQUISITOS.md`: rastreabilidade do PDF.
 - `docs/CHECKLIST-DESAFIO.md`: checklist obrigatório/opcional com evidências e pendências de entrega.

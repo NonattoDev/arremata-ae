@@ -134,50 +134,38 @@ Não é necessário fazer nota fiscal, revenda entre usuários, aplicativo nativ
 - Atualização por polling; o PDF exige atualização sem reload, mas não determina WebSocket.
 - HMAC encadeado e checkpoint para auditoria; o PDF deixa a técnica livre.
 
-## Situação do projeto e o que falta fechar
+## Situação atual — revisão de 25/10/2026
 
-Revisão atual: código de todas as áreas obrigatórias lido; 13 testes automatizados aprovados; smoke HTTP local com três logins, lances, saldo, auditoria e imagem; cadastro/publicação/cancelamento/logout exercitados localmente. Vercel consultada: último deploy anterior READY; GitHub confirmado PUBLIC. Revisão 8b425bf publicada: deploy dpl_D7byTETGeiRUuF6LXER15bosWMUV READY e smoke HTTP autenticado aprovado na URL pública.
+Os requisitos funcionais obrigatórios permanecem implementados. A revisão atual passou por TypeScript, 26 testes automatizados, build de produção e validação do schema Prisma. O smoke HTTP local autenticou os três perfis, verificou permissões/origem, depósito, importação de obra, disputa, posição e auditoria pública.
 
-| Área | Evidência disponível | O que falta antes da entrega |
-| --- | --- | --- |
-| Funcionalidades de frontend | Telas implementadas; fluxos de login, carteira, lances e navegação já exercitados | Revisar todos os fluxos da interface final, incluindo cadastro e ambos os perfis |
-| Interface final | Rotas, logo e navbar ajustadas localmente; TypeScript e build passaram | Validar versão final no celular; mudanças publicadas na revisão 8b425bf |
-| Backend | Testes de regras, concorrência, reserva, liquidação e adulteração reexecutados | 13 testes aprovados nesta auditoria, incluindo indisponibilidade externa e propriedade entre leiloeiros |
-| API externa | Importação real e imagem persistida registradas | Teste de falha de fetch aprovado: listagem, sala, lance, auditoria, liquidação, comprovante e imagem persistida independem da API |
-| Produção | Vercel + Neon publicados; login, lance, auditoria, comprovante e cron real comprovados no registro anterior | Revisão 8b425bf READY; smoke com três logins e lances aprovado, comprovante público conferido sem login |
-| Seed | 1 leiloeiro, 2 licitantes e lotes abertos registrados na publicação | Lote f7940e19-5a07-49df-ad30-b6cc22b66c72 confirmado aberto até 05/11/2026; reconferir na entrega |
-| Opcionais | Busca/filtro, temas e testes implementados | Docker Compose e cancelamento com estorno não estão registrados como entregues; não bloqueiam o obrigatório |
-| Documentação e envio | README e documentos técnicos existentes | Revisão do candidato, relato de IA, confirmação do prazo e envio do formulário |
+- [x] Revalidar regras financeiras, concorrência, anti-sniping, liquidação idempotente, adulteração e indisponibilidade externa (26 testes da suíte atual).
+- [x] Revalidar TypeScript, build de produção e schema Prisma.
+- [x] Repetir smoke HTTP local com leiloeiro, Ana e Bruno.
+- [x] Revisar no navegador integrado a sala mobile com Ana superada, saldo disponível, histórico e contador em segundos.
+- [x] Conferir catálogo público: três lotes ao vivo na consulta de 25/10.
+- [ ] Publicar a revisão atual; a produção consultada ainda aponta para d15ac481 (22/10).
+- [ ] Aplicar em produção as migrations aditivas de avatar e CPF antes de publicar o código que consulta esses campos.
+- [ ] Revalidar contas, fluxo integrado e lote aberto na revisão pública final.
+- [ ] Candidato avaliar pessoalmente a solução e o relato de IA.
+- [ ] Preencher e enviar o formulário com autorização explícita do candidato.
 
-### Ordem para fechar a entrega
-
-Estas são nossas verificações de qualidade; não representam novos opcionais ou exigências textuais da banca.
-
-- [ ] Percorrer o checklist obrigatório na versão final, com leiloeiro, dois licitantes e visitante sem login.
-- [ ] Validar desktop e celular, especialmente cadastro, criação/cancelamento, lances, carteira, arremates e compartilhamento.
-- [x] Conferir concorrência, saldo entre lotes, anti-sniping, liquidação única, adulteração e indisponibilidade externa. Suíte local aprovada; concorrência PostgreSQL independente registrada na validação anterior.
-- [x] Publicar as alterações locais e repetir a conferência principal na URL pública. Commit 8b425bf, deploy READY e smoke autenticado aprovados.
-- [x] Garantir contas de teste acessíveis e lote aberto para avaliação. Três logins aprovados; lote aberto até 05/11/2026, reconferir se a avaliação ocorrer depois.
-- [ ] Revisar README, limitações e relato de IA; confirmar entendimento das decisões pelo candidato.
-- [ ] Conferir prazo e links; enviar o formulário apenas com autorização explícita do candidato.
-
-Evidências detalhadas: [VALIDACAO.md](VALIDACAO.md). Arquitetura: [ARQUITETURA.md](ARQUITETURA.md).
+As evidências de navegação anteriores continuam registradas em VALIDACAO.md; não equivalem a um teste completo em aparelho físico. Docker Compose e cancelamento com estorno são opcionais e não bloqueiam a entrega.
 
 ## Evidências por grupo auditado
 
-| Itens | Código / evidência | Resultado |
-| --- | --- | --- |
-| React, Node e banco | package.json; route.ts runtime nodejs; prisma/schema.prisma e adapter PostgreSQL | Conferidos |
-| Autenticação e papéis | commands/auth.ts, security.ts, commands/context.ts, commands/market.ts; smoke e cadastro HTTP local | Login dos três usuários, cadastro, sessão e logout aprovados |
-| Vitrine e API | explore.tsx, catalog.ts, AuctionService.listLots; smoke de publicação/cancelamento | Categorias, imagem persistida e cancelado oculto conferidos |
-| Painel e arremates | create-lot.tsx, my-lots.tsx, LotCard e Share | Resultado explícito e botão de compartilhar adicionados; cópia do link conferida no navegador |
-| Sala e carteira | lot-room.tsx, countdown.tsx, use-resource.ts, wallet-page.tsx; testes e smoke | Posição, saldo e mensagens conferidos; polling de 2s |
-| Auditoria e comprovante | domain/audit.ts, audit-page.tsx, receipt-page.tsx; testes SQL | Alteração, remoção e inserção detectadas; alias sem dados pessoais |
-| Regras financeiras | auction.ts; tests/auction.test.ts e prisma-adapter.test.ts | Mínimos, horários, liderança, reserva, anti-sniping e liquidação aprovados |
-| API indisponível | tests/catalog-outage.test.ts | Buscas/importações falham com mensagem; operações em lotes persistidos continuam |
-| Permissão entre leiloeiros | tests/auction.test.ts | Segundo leiloeiro não cancela nem lista lotes do primeiro |
-| HTML do painel/sala | Navegador detectou parágrafos aninhados; composição corrigida em my-lots e lot-room | Corrigido nesta auditoria |
-| Deploy e repositório existentes | Vercel list_deployments: dpl_BbeBw7p5TnGNr8oaEe7hs2YYhaoQ READY; gh repo view: PUBLIC | Versão anterior confirmada; atualização final separada |
+| Itens                           | Código / evidência                                                                                  | Resultado                                                                                     |
+| ------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| React, Node e banco             | package.json; route.ts runtime nodejs; prisma/schema.prisma e adapter PostgreSQL                    | Conferidos                                                                                    |
+| Autenticação e papéis           | commands/auth.ts, security.ts, commands/context.ts, commands/market.ts; smoke e cadastro HTTP local | Login dos três usuários, cadastro, sessão e logout aprovados                                  |
+| Vitrine e API                   | catalogo.tsx, catalogo.ts, ServicoLeiloes.listarLotes; smoke de publicação/cancelamento             | Categorias, imagem persistida e cancelado oculto conferidos                                   |
+| Painel e arremates              | create-lot.tsx, my-lots.tsx, LotCard e Share                                                        | Resultado explícito e botão de compartilhar adicionados; cópia do link conferida no navegador |
+| Sala e carteira                 | lot-room.tsx, countdown.tsx, use-resource.ts, wallet-page.tsx; testes e smoke                       | Posição, saldo e mensagens conferidos; polling de 2s                                          |
+| Auditoria e comprovante         | dominio/auditoria.ts, audit-page.tsx, receipt-page.tsx; testes SQL                                  | Alteração, remoção e inserção detectadas; alias sem dados pessoais                            |
+| Regras financeiras              | auction.ts; tests/auction.test.ts e prisma-adapter.test.ts                                          | Mínimos, horários, liderança, reserva, anti-sniping e liquidação aprovados                    |
+| API indisponível                | tests/catalog-outage.test.ts                                                                        | Buscas/importações falham com mensagem; operações em lotes persistidos continuam              |
+| Permissão entre leiloeiros      | tests/auction.test.ts                                                                               | Segundo leiloeiro não cancela nem lista lotes do primeiro                                     |
+| HTML do painel/sala             | Navegador detectou parágrafos aninhados; composição corrigida em my-lots e lot-room                 | Corrigido nesta auditoria                                                                     |
+| Deploy e repositório existentes | Vercel list_deployments: dpl_BbeBw7p5TnGNr8oaEe7hs2YYhaoQ READY; gh repo view: PUBLIC               | Versão anterior confirmada; atualização final separada                                        |
 
 Prazo confirmado no e-mail que acompanha o PDF correto, recebido em 22/10/2026. O aviso anterior sobre Coderbyte e anexo de QA não é o início deste desafio. Não publicamos o conteúdo privado do e-mail no repositório.
 

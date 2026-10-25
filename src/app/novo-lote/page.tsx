@@ -1,11 +1,13 @@
 "use client";
-import { CreateLot } from "@/features/auctions/create-lot";
-import { Protected } from "@/features/auth/protected";
-import { useSession } from "@/components/providers/session-provider";
-export default function Page() {
-  const session = useSession();
-  const user = session.data?.user;
+import { CriarLote } from "@/funcionalidades/leiloes/criar-lote";
+import { AreaProtegida } from "@/funcionalidades/autenticacao/area-protegida";
+import { useSessao } from "@/componentes/provedores/provedor-sessao";
+export default function Pagina() {
+  const sessao = useSessao();
+  const usuario = sessao.dados?.user;
   return (
-    <Protected auth={session}>{user && <CreateLot user={user} />}</Protected>
+    <AreaProtegida autenticacao={sessao}>
+      {usuario && <CriarLote usuario={usuario} />}
+    </AreaProtegida>
   );
 }

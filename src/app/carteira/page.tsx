@@ -1,11 +1,13 @@
 "use client";
-import { WalletPage } from "@/features/wallet/wallet-page";
-import { Protected } from "@/features/auth/protected";
-import { useSession } from "@/components/providers/session-provider";
-export default function Page() {
-  const session = useSession();
-  const user = session.data?.user;
+import { PaginaCarteira } from "@/funcionalidades/carteira/pagina-carteira";
+import { AreaProtegida } from "@/funcionalidades/autenticacao/area-protegida";
+import { useSessao } from "@/componentes/provedores/provedor-sessao";
+export default function Pagina() {
+  const sessao = useSessao();
+  const usuario = sessao.dados?.user;
   return (
-    <Protected auth={session}>{user && <WalletPage user={user} />}</Protected>
+    <AreaProtegida autenticacao={sessao}>
+      {usuario && <PaginaCarteira usuario={usuario} />}
+    </AreaProtegida>
   );
 }

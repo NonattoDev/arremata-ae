@@ -1,7 +1,7 @@
 "use client";
-import { Auth } from "@/features/auth/auth-form";
-import { useSession } from "@/components/providers/session-provider";
-export default function Page() {
-  const session = useSession();
-  return <Auth onLogin={session.refresh} />;
+import { FormularioAcesso } from "@/funcionalidades/autenticacao/formulario-acesso";
+import { useSessao } from "@/componentes/provedores/provedor-sessao";
+export default function Pagina() {
+  const sessao = useSessao();
+  return <FormularioAcesso aoEntrar={sessao.atualizar} />;
 }

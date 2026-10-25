@@ -1,4 +1,4 @@
-import { HomePage } from "@/features/home/home-page";
-export default function Page() {
-  return <HomePage />;
+import { PaginaInicial } from "@/funcionalidades/inicio/pagina-inicial";
+export default function Pagina() {
+  return <PaginaInicial />;
 }

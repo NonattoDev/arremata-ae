@@ -143,9 +143,9 @@ Os requisitos funcionais obrigatórios permanecem implementados. A revisão atua
 - [x] Repetir smoke HTTP local com leiloeiro, Ana e Bruno.
 - [x] Revisar no navegador integrado a sala mobile com Ana superada, saldo disponível, histórico e contador em segundos.
 - [x] Conferir catálogo público: três lotes ao vivo na consulta de 25/10.
-- [ ] Publicar a revisão atual; a produção consultada ainda aponta para d15ac481 (22/10).
-- [ ] Aplicar em produção as migrations aditivas de avatar e CPF antes de publicar o código que consulta esses campos.
-- [ ] Revalidar contas, fluxo integrado e lote aberto na revisão pública final.
+- [x] Publicar a revisão atual: f8062eb, deploy Vercel READY em 25/10/2026.
+- [x] Aplicar no Neon as migrations aditivas de avatar e CPF antes de publicar o código que consulta esses campos.
+- [x] Revalidar três contas, fluxo integrado e três lotes abertos na revisão pública. Login e Server Action do perfil também exercitados pelo navegador.
 - [ ] Candidato avaliar pessoalmente a solução e o relato de IA.
 - [ ] Preencher e enviar o formulário com autorização explícita do candidato.
 

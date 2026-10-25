@@ -17,7 +17,7 @@ Antes de enviar, preciso revisar e compreender pessoalmente o código, as decis�
 - [ ] Candidato revisou a solução e o relato acima.
 - [ ] Nome completo e e-mail conferidos no formulário, sem incluir dados pessoais desnecessários neste repositório.
 - [ ] Checklist final revisado; limitações informadas.
-- [ ] Links e contas acessíveis e pelo menos um lote aberto.
+- [x] Links e contas acessíveis e pelo menos um lote aberto, conferidos em 25/10/2026. Reconferir se enviar em outra data.
 - [ ] Envio autorizado explicitamente pelo candidato.
 
 Formulário informado no desafio: https://elitedev.verzel.com.br/?elite-dev-2026-2

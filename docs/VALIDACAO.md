@@ -142,3 +142,15 @@ Commit 8b425bf publicado no GitHub pessoal e deploy Vercel dpl_D7byTETGeiRUuF6LX
 - Perfil adicional (não exigido pelo PDF): nome/CPF gravados juntos; CPF inválido não grava nome; documento existente não pode ser sobrescrito. Foto/avatares, troca de senha e isolamento entre usuários cobertos por testes.
 - Consulta da Vercel: projeto arremata-ae em NatosTech, produção READY dpl_BJESYKQNJb7jDz5zN9B31WaoFDwp, commit d15ac481. Catálogo público respondeu HTTP 200 com três lotes ao vivo. Isso confirma a versão antiga, não a revisão local.
 - Prisma migrate status no Neon confirmou duas migrations pendentes: avatar_usuario e cpf_usuario. Ambas apenas acrescentam colunas opcionais; não removem registros nem alteram o segredo da auditoria.
+
+### Publicação da revisão de 25/10
+
+- Migrations 20261025000000_avatar_usuario e 20261025010000_cpf_usuario aplicadas com Prisma Migrate Deploy no Neon existente. Nenhum reset/seed de produção nem alteração do segredo HMAC.
+- GitHub pessoal main atualizado; código da revisão 06e46b9 e assets dos avatares f8062eb. Vercel NatosTech: deploy dpl_Bty5EWQqr4VoDSQ3tXPgegvH4eLE READY, URL pública arremata-ae.vercel.app.
+- Smoke HTTP na URL pública aprovado para três contas e regras básicas. Criou lote 05948dbf-6b2f-4b86-8bf7-50c987e95dff, dois lances e depósito simulado de R$ 10 na conta Ana. Não alterou lances dos lotes anteriores.
+- Login real de Ana na interface publicada e gravação do perfil pela Server Action aprovados em viewport 393×852. Nome mantido, CPF não preenchido. Imagem/categorias de avatares exibidas. Evidências locais: .local/producao-perfil-mobile-25out.png e .local/producao-avatares-mobile-25out.png.
+- Lote local de smoke encerrou, gerou comprovante de R$ 110 e auditoria íntegra. Encerramento publicado é verificado separadamente.
+
+- Comprovante do lote público de smoke retornou HTTP 200, R$ 110, auditoria íntegra com dois lances, sem e-mail de licitante; repetição preservou o mesmo comprovante. A aplicação também liquida vencidos nas leituras: esta observação comprova encerramento via aplicação, não isola a execução do agendador.
+- Configuração ativa de cron conferida pela API da Vercel: habilitado, associado ao deploy f8062eb, rota /api/cron/settle a cada minuto. Consulta ao conector de logs não retornou eventos nesta janela; a evidência de execução real anterior de 22/10 permanece histórica.
+- Revisão pessoal e envio do formulário continuam pendentes. Não houve envio automático do desafio.

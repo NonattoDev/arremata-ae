@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { criarBancoLocal, criarBancoPostgres } from "../src/servidor/banco";
 import { ServicoLeiloes } from "../src/servidor/leilao";
 import { esquema } from "../src/servidor/esquema";
+import { completarCadastro } from "../src/servidor/comandos/completar-cadastro";
 
 let banco: Awaited<ReturnType<typeof criarBancoLocal>>;
 let servico: ServicoLeiloes, servicoConcorrente: ServicoLeiloes;
@@ -52,10 +53,78 @@ before(async () => {
     "bidder",
   );
   bruno = await servico.criarUsuario("bob@test.local", "Bob", "hash", "bidder");
+  await banco.busca(
+    "UPDATE users SET cpf='52998224725', nascimento='1990-01-01' WHERE id IN ($1,$2)",
+    [ana, bruno],
+  );
 });
 after(async () => {
   await banco?.fechar();
   await bancoConcorrente?.fechar();
+});
+test("exige CPF e nascimento, completa cadastro e impede substituir identidade", async () => {
+  const idUsuario = await servico.criarUsuario(
+    "pendente@test.local",
+    "Pendente",
+    "hash",
+    "bidder",
+  );
+  const idLote = await lote();
+  await servico.depositar(idUsuario, 20000);
+  const contexto = {
+    db: banco,
+    service: servico,
+    user: {
+      id: idUsuario,
+      name: "Pendente",
+      email: "pendente@test.local",
+      role: "bidder" as const,
+      alias: "Pendente",
+    },
+    token: undefined,
+  };
+  await assert.rejects(
+    servico.darLance(idUsuario, idLote, 10000),
+    /CPF.*nascimento/,
+  );
+  await assert.rejects(
+    completarCadastro(contexto, {
+      cpf: "11111111111",
+      nascimento: "1990-01-01",
+    }),
+  );
+  await assert.rejects(
+    completarCadastro(contexto, {
+      cpf: "52998224725",
+      nascimento: "2000-02-30",
+    }),
+  );
+  await assert.rejects(
+    completarCadastro(contexto, {
+      cpf: "52998224725",
+      nascimento: "2999-01-01",
+    }),
+  );
+  await banco.busca("UPDATE users SET cpf='52998224725' WHERE id=$1", [
+    idUsuario,
+  ]);
+  await assert.rejects(
+    servico.darLance(idUsuario, idLote, 10000),
+    /CPF.*nascimento/,
+  );
+  await completarCadastro(contexto, {
+    cpf: "52998224725",
+    nascimento: "1990-01-01",
+  });
+  await servico.darLance(idUsuario, idLote, 10000);
+  assert.equal((await servico.obterLote(idLote, idUsuario)).isLeader, true);
+  await assert.rejects(
+    completarCadastro(contexto, {
+      cpf: "52998224725",
+      nascimento: "1991-01-01",
+    }),
+    /suporte/,
+  );
 });
 const lote = (adicionais = {}) =>
   servico.criarLote(leiloeiro, {
@@ -122,6 +191,10 @@ test("lances simultâneos em lotes distintos não comprometem o mesmo saldo duas
     "Pouco saldo",
     "hash",
     "bidder",
+  );
+  await banco.busca(
+    "UPDATE users SET cpf='52998224725', nascimento='1990-01-01' WHERE id=$1",
+    [usuario],
   );
   await servico.depositar(usuario, 10000);
   const primeiro = await lote(),
@@ -209,4 +282,29 @@ test("recebimentos acima do limite de depósitos não bloqueiam a liquidação",
   assert.equal((await servico.comprovante(id)).amount, 10000);
   assert.ok((await servico.carteira(leiloeiro)).total > 1000000000000);
   assert.ok(Array.isArray(await servico.listarLotes()));
+});
+
+test("auditoria pagina sem repetir lances e detecta alteração fora da página", async () => {
+  const id = await lote();
+  await servico.depositar(ana, 1000000);
+  await servico.depositar(bruno, 1000000);
+  for (let indice = 0; indice < 30; indice++) {
+    await servico.darLance(indice % 2 ? bruno : ana, id, 10000 + indice * 1000);
+  }
+  const primeira = await servico.auditar(id, 1);
+  const segunda = await servico.auditar(id, 2);
+  assert.equal(primeira.total, 30);
+  assert.equal(primeira.totalPaginas, 2);
+  assert.equal(primeira.bids.length, 25);
+  assert.equal(segunda.bids.length, 5);
+  assert.equal(
+    new Set([...primeira.bids, ...segunda.bids].map((lance) => lance.sequence))
+      .size,
+    30,
+  );
+  assert.equal((await servico.auditar(id, 999)).pagina, 2);
+  await banco.busca("UPDATE bids SET amount=1 WHERE lot_id=$1 AND sequence=1", [
+    id,
+  ]);
+  assert.equal((await servico.auditar(id, 1)).intact, false);
 });

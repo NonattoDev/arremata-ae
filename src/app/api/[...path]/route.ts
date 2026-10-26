@@ -103,7 +103,17 @@ async function tratarRequisicao(
           await servico.obterLote(z.uuid().parse(caminho[1]), usuario?.id),
         );
       if (caminho[0] === "audit")
-        return responderJson(await servico.auditar(z.uuid().parse(caminho[1])));
+        return responderJson(
+          await servico.auditar(
+            z.uuid().parse(caminho[1]),
+            z.coerce
+              .number()
+              .int()
+              .min(1)
+              .max(1000000)
+              .parse(requisicao.nextUrl.searchParams.get("pagina") ?? 1),
+          ),
+        );
       if (caminho[0] === "receipts")
         return responderJson(
           await servico.comprovante(z.uuid().parse(caminho[1])),

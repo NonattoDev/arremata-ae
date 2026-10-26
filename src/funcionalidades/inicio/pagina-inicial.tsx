@@ -28,7 +28,11 @@ export function PaginaInicial() {
       <Card variant="transparent" className="gap-6 p-0">
         <Card.Header className="flex-row flex-wrap items-end justify-between gap-4">
           <Card.Content className="flex-none gap-2">
-            <Typography.Heading level={2} className="text-2xl sm:text-3xl">
+            <Typography.Heading
+              level={2}
+              className="flex items-center gap-3 text-2xl sm:text-3xl"
+            >
+              <Icone nome="leilao" className="text-accent" />
               Em leilão agora
             </Typography.Heading>
             <Card.Description>

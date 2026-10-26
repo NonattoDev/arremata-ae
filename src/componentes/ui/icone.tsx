@@ -2,6 +2,8 @@ import { Chip } from "@heroui/react";
 import { fonteIcones } from "@/lib/fonte-icones";
 
 const simbolos = {
+  cartao: "credit_card",
+  qr: "qr_code_2",
   som: "volume_up",
   semSom: "volume_off",
   email: "mail",

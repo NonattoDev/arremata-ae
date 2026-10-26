@@ -16,7 +16,7 @@ export function Marca({ vertical = false }: { vertical?: boolean }) {
       onFocus={() => {
         destacar();
       }}
-      className={`flex w-fit shrink-0 items-center gap-2 sm:gap-3 ${vertical ? "flex-col text-center" : ""}`}
+      className={`flex w-fit shrink-0 items-center gap-2 no-underline! sm:gap-3 ${vertical ? "flex-col text-center" : ""}`}
     >
       <Image
         ref={simbolo}

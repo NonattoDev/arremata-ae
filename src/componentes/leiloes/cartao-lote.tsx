@@ -16,8 +16,15 @@ import { IndicadorAoVivo } from "./indicador-ao-vivo";
 import { historiasObras } from "@/lib/historias-obras";
 import type { Lote } from "@/tipos/leilao";
 import { formatarReais, rotulosSituacao } from "@/lib/formatacao";
+import type { ReactNode } from "react";
 
-export function CartaoLote({ lote }: { lote: Lote }) {
+export function CartaoLote({
+  lote,
+  children,
+}: {
+  lote: Lote;
+  children?: ReactNode;
+}) {
   const endereco = `/lotes/${lote.id}`;
   const encerrado = lote.status === "closed";
   const rotuloValor = encerrado
@@ -49,6 +56,15 @@ export function CartaoLote({ lote }: { lote: Lote }) {
             size="sm"
             className="pointer-events-none absolute left-4 top-4"
           >
+            <Icone
+              nome={
+                lote.status === "scheduled"
+                  ? "tempo"
+                  : lote.status === "cancelled"
+                    ? "cancelar"
+                    : "confirmar"
+              }
+            />
             {rotulosSituacao[lote.status]}
           </Chip>
         )}
@@ -89,7 +105,7 @@ export function CartaoLote({ lote }: { lote: Lote }) {
         </Card.Content>
         <PrazoLote lote={lote} />
       </Card.Content>
-      <Card.Footer className="mt-auto flex-row flex-wrap items-center justify-between gap-2 px-5 pb-5">
+      <Card.Footer className="mt-auto flex-row flex-nowrap items-center justify-between gap-2 px-5 pb-5">
         <Link
           href={endereco}
           aria-label={`${encerrado ? "Ver resultado" : "Abrir leilão"}: ${lote.item.title}`}
@@ -107,6 +123,11 @@ export function CartaoLote({ lote }: { lote: Lote }) {
           <BotaoAcompanhar id={lote.id} compacto />
         )}
       </Card.Footer>
+      {children && (
+        <Card.Content className="gap-3 border-t border-border/60 px-5 py-4">
+          {children}
+        </Card.Content>
+      )}
     </Card>
   );
 }

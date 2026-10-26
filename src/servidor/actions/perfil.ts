@@ -8,6 +8,13 @@ import {
 import { alterarSenha } from "../comandos/alterar-senha";
 import { salvarFotoPerfil } from "../comandos/foto-perfil";
 import { contextoAcao, resultadoAcao } from "./suporte";
+import { completarCadastro } from "../comandos/completar-cadastro";
+
+export async function completarCadastroAcao(entrada: unknown) {
+  return resultadoAcao(async () =>
+    completarCadastro(await contextoAcao(), entrada),
+  );
+}
 
 export async function salvarNomeAcao(entrada: unknown) {
   return resultadoAcao(async () => salvarNome(await contextoAcao(), entrada));

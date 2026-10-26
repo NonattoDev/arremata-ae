@@ -7,6 +7,7 @@ export type Usuario = {
   alias: string;
   avatar?: string | null;
   cpf?: string | null;
+  nascimento?: string | null;
   role: "seller" | "bidder";
 };
 

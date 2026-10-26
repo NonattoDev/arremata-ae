@@ -30,14 +30,15 @@ export function CaminhoPagina() {
         Início
       </Breadcrumbs.Item>
       {isLot && <Breadcrumbs.Item href="/leiloes">Leilões</Breadcrumbs.Item>}
-      {id && area !== "lotes" && (
+      {id && isLot && area !== "lotes" && (
         <Breadcrumbs.Item href={`/lotes/${id}`}>Lote</Breadcrumbs.Item>
       )}
       {area === "novo-lote" && (
         <Breadcrumbs.Item href="/meus-lotes">Meus lotes</Breadcrumbs.Item>
       )}
+      {area === "carteira" && id === "comprovantes" && <Breadcrumbs.Item href="/carteira">Carteira</Breadcrumbs.Item>}
       <Breadcrumbs.Item className="font-semibold text-foreground">
-        {titles[area]}
+        {area === "carteira" && id === "comprovantes" ? "Comprovantes" : titles[area]}
       </Breadcrumbs.Item>
     </Breadcrumbs>
   );

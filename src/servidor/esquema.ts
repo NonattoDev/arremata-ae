@@ -14,4 +14,28 @@ export const esquema =
   readFileSync(
     resolve("prisma/migrations/20261025010000_cpf_usuario/migration.sql"),
     "utf8",
+  ) +
+  readFileSync(
+    resolve(
+      "prisma/migrations/20261025020000_depositos_simulados/migration.sql",
+    ),
+    "utf8",
+  ) +
+  readFileSync(
+    resolve(
+      "prisma/migrations/20261025030000_preferencias_novidades/migration.sql",
+    ),
+    "utf8",
+  ) +
+  readFileSync(
+    resolve(
+      "prisma/migrations/20261025040000_contatos_novidades/migration.sql",
+    ),
+    "utf8",
+  ) +
+  readFileSync(
+    resolve(
+      "prisma/migrations/20261026000000_nascimento_usuario/migration.sql",
+    ),
+    "utf8",
   );

@@ -64,6 +64,14 @@ export function DadosPerfil({ usuario }: { usuario: Usuario }) {
             usuario.role === "seller" ? "Leiloeiro" : "Licitante",
           ],
           ...(usuario.cpf ? [["CPF", formatarCpf(usuario.cpf)]] : []),
+          ...(usuario.nascimento
+            ? [
+                [
+                  "Data de nascimento",
+                  usuario.nascimento.split("-").reverse().join("/"),
+                ],
+              ]
+            : []),
         ].map(([rotulo, valor]) => (
           <Card.Content key={rotulo} className="gap-1">
             <Typography className="text-xs text-muted">{rotulo}</Typography>

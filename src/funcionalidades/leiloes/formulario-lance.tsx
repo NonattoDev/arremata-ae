@@ -18,6 +18,8 @@ import { Aviso } from "@/componentes/ui/aviso";
 import { Icone } from "@/componentes/ui/icone";
 import { formatarReais } from "@/lib/formatacao";
 import type { Sala } from "@/tipos/leilao";
+import { cadastroCompleto } from "@/lib/dados-participacao";
+import { CompletarCadastroModal } from "@/funcionalidades/perfil/completar-cadastro-modal";
 export function FormularioLance({
   lote,
   atualizar,
@@ -27,7 +29,9 @@ export function FormularioLance({
   atualizar: () => Promise<void>;
   erroConsulta: string;
 }) {
-  const usuario = useSessao().dados?.user;
+  const sessao = useSessao();
+  const usuario = sessao.dados?.user;
+  const [completar, definirCompletar] = useState(false);
   const id = lote.id;
   const minimo = lote.bidCount
     ? lote.currentAmount + lote.increment
@@ -42,6 +46,10 @@ export function FormularioLance({
     [ocupado, definirOcupado] = useState(false);
   const enviarLance = async (evento: FormEvent) => {
     evento.preventDefault();
+    if (!cadastroCompleto(usuario)) {
+      definirCompletar(true);
+      return;
+    }
     definirOcupado(true);
     definirMensagem("");
     definirErro("");
@@ -119,6 +127,18 @@ export function FormularioLance({
       </Form>
       {erro && <Aviso>{erro}</Aviso>}
       {mensagem && <Aviso sucesso>{mensagem}</Aviso>}
+      {completar && usuario && (
+        <CompletarCadastroModal
+          usuario={usuario}
+          aoFechar={() => definirCompletar(false)}
+          aoSalvar={async () => {
+            await sessao.atualizar();
+            definirMensagem(
+              "Cadastro completo! Confira o valor e confirme seu lance.",
+            );
+          }}
+        />
+      )}
     </>
   );
 }

@@ -38,6 +38,7 @@ test("adaptador Prisma persiste lances, desfaz falhas e liquida comprovantes ass
       "test",
       "bidder",
     );
+    await banco.busca("UPDATE users SET cpf='52998224725', nascimento='1990-01-01' WHERE id=$1", [licitante]);
     await servico.depositar(licitante, 1000);
     const lote = await servico.criarLote(leiloeiro, {
       item: {

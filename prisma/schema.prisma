@@ -9,15 +9,18 @@ datasource db {
 
 /// O papel é limitado a seller/bidder pela restrição CHECK da migration.
 model Usuario {
+  preferenciasNovidades PreferenciaNovidades[]
   id             String         @id
   email          String         @unique
   nome           String         @map("name")
   avatar         String?
   cpf            String?
+  nascimento     DateTime?      @db.Date
   hashSenha      String         @map("password_hash")
   papel          String         @map("role")
   apelido        String         @unique @map("alias")
   saldo          BigInt         @default(0) @map("balance")
+  depositosSimulados DepositoSimulado[]
   sessoes        Sessao[]
   lotesOfertados Lote[]         @relation("Seller")
   lotesLiderados Lote[]         @relation("Leader")
@@ -39,6 +42,7 @@ model Sessao {
 /// O item guarda os metadados e a imagem copiados da API.
 /// Valores monetários ficam em centavos inteiros; restrições CHECK estão na migration.
 model Lote {
+  preferenciasNovidades PreferenciaNovidades[]
   id               String         @id
   idLeiloeiro      String         @map("seller_id")
   item             Json           @db.JsonB
@@ -102,4 +106,34 @@ model LimiteTentativas {
   reiniciaEm DateTime @map("resets_at") @db.Timestamptz
 
   @@map("rate_limits")
+}
+
+model DepositoSimulado {
+ id String @id
+ idUsuario String @map("user_id")
+ valor BigInt @map("amount")
+ metodo String @map("method")
+ estado String @default("pending") @map("status")
+ criadoEm DateTime @map("created_at") @db.Timestamptz
+ disponivelEm DateTime @map("ready_at") @db.Timestamptz
+ expiraEm DateTime @map("expires_at") @db.Timestamptz
+ confirmadoEm DateTime? @map("confirmed_at") @db.Timestamptz
+ usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+ @@index([idUsuario, criadoEm], map: "deposit_simulations_user")
+ @@map("deposit_simulations")
+}
+
+model PreferenciaNovidades {
+  numeroWhatsapp String @default("") @map("whatsapp_number")
+  usuarioTelegram String @default("") @map("telegram_username")
+  idUsuario String @map("user_id")
+  idLote String @map("lot_id")
+  whatsapp Boolean @default(false)
+  telegram Boolean @default(false)
+  email Boolean @default(false)
+  atualizadoEm DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lote Lote @relation(fields: [idLote], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  @@id([idUsuario, idLote])
+  @@map("auction_news_preferences")
 }

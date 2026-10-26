@@ -3,6 +3,7 @@ import { Icone } from "@/componentes/ui/icone";
 
 import { Button, Card, Dropdown, Link, buttonVariants } from "@heroui/react";
 import { usePathname } from "next/navigation";
+import { AtalhoNavegacao, coresIconesNavegacao } from "@/componentes/layout/atalho-navegacao";
 import { Marca } from "@/componentes/layout/marca";
 import { MenuUsuario } from "@/componentes/layout/menu-usuario";
 import type { Usuario } from "@/tipos/leilao";
@@ -56,25 +57,21 @@ export function BarraNavegacao({
         className="hidden flex-none flex-row items-center justify-center gap-1 lg:flex"
       >
         {atalhos.map(({ href, label: rotulo, active }) => (
-          <Link
+          <AtalhoNavegacao
             key={href}
             href={href}
-            aria-current={active ? "page" : undefined}
-            className={`flex h-11 items-center justify-center gap-2 rounded-full px-3 text-sm leading-none whitespace-nowrap ${active ? "bg-surface-secondary" : ""}`}
-          >
-            <Icone
-              nome={
-                href === "/"
-                  ? "inicio"
-                  : href === "/leiloes"
-                    ? "leilao"
-                    : href === "/carteira"
-                      ? "carteira"
-                      : "comprovante"
-              }
-            />
-            {rotulo}
-          </Link>
+            rotulo={rotulo}
+            ativo={active}
+            icone={
+              href === "/"
+                ? "inicio"
+                : href === "/leiloes"
+                  ? "leilao"
+                  : href === "/carteira"
+                    ? "carteira"
+                    : "comprovante"
+            }
+          />
         ))}
       </Card.Content>
       <Card.Footer className="w-auto items-center justify-end gap-2 lg:justify-self-end">
@@ -94,6 +91,7 @@ export function BarraNavegacao({
                   href={atalho.href}
                 >
                   <Icone
+                    className={coresIconesNavegacao[atalho.href === "/" ? "inicio" : atalho.href === "/leiloes" ? "leilao" : atalho.href === "/carteira" ? "carteira" : "comprovante"]}
                     nome={
                       atalho.href === "/"
                         ? "inicio"
@@ -136,7 +134,8 @@ export function BarraNavegacao({
             href="/entrar"
             className={buttonVariants({
               variant: "primary",
-              className: "hidden lg:inline-flex",
+              className:
+                "hidden items-center gap-2 no-underline! transition-transform duration-200 hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none lg:inline-flex",
             })}
           >
             <Icone nome="entrar" /> Participar

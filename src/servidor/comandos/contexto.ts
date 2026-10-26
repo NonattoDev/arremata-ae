@@ -7,7 +7,7 @@ export async function contextoComando(token?: string) {
   const banco = await bancoDados();
   const [usuario] = token
     ? await banco.busca<Usuario>(
-        "SELECT u.id,u.name,u.email,u.role,u.alias,u.avatar,u.cpf FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=$1 AND s.expires_at > now()",
+        "SELECT u.id,u.name,u.email,u.role,u.alias,u.avatar,u.cpf,to_char(u.nascimento,'YYYY-MM-DD') AS nascimento FROM users u JOIN sessions s ON s.user_id=u.id WHERE s.token_hash=$1 AND s.expires_at > now()",
         [hashToken(token)],
       )
     : [];

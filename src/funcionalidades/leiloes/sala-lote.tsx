@@ -21,7 +21,9 @@ import { Icone } from "@/componentes/ui/icone";
 import { Aviso } from "@/componentes/ui/aviso";
 import { Carregando } from "@/componentes/ui/carregando";
 import { FormularioLance } from "./formulario-lance";
+import { NovidadesLote } from "@/componentes/leiloes/novidades-lote";
 import { AvisoNovoLance } from "@/componentes/leiloes/aviso-novo-lance";
+import { AberturaLances } from "@/componentes/leiloes/abertura-lances";
 
 export function SalaLote({ id }: { id: string }) {
   const usuario = useSessao().dados?.user;
@@ -101,6 +103,13 @@ export function SalaLote({ id }: { id: string }) {
               />
             )}
           </Card>
+          {lote.status === "scheduled" && (
+            <NovidadesLote
+              key={`${id}:${usuario?.id ?? "visitante"}`}
+              loteId={id}
+              usuarioId={usuario?.id}
+            />
+          )}
           {!lote.intact && (
             <Aviso>Histórico adulterado. Este lote está bloqueado.</Aviso>
           )}
@@ -142,8 +151,11 @@ export function SalaLote({ id }: { id: string }) {
               </Link>
             ))}
           {lote.hasWinner && (
-            <Link href={`/comprovante/${id}`}>
-              <Icone nome="comprovante" />
+            <Link
+              href={`/comprovante/${id}`}
+              className={`${buttonVariants({ variant: "primary", size: "sm" })} inline-flex! w-fit self-start items-center! gap-2! px-4 no-underline!`}
+            >
+              <Icone nome="comprovante" className="text-[18px]! no-underline!" />
               Ver comprovante
             </Link>
           )}
@@ -164,20 +176,24 @@ export function SalaLote({ id }: { id: string }) {
       </Card.Content>
       <Card.Content className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <DadosObra lote={lote} />
-        <Card className="min-w-0 gap-4 rounded-3xl border border-emerald-900/10 p-5 sm:p-6">
-          <Card.Header className="gap-1 p-0">
-            <Card.Title className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
-              <Icone nome="historico" />
-              Histórico de lances
-            </Card.Title>
-            <Card.Description>
-              {recurso.erro
-                ? "Atualização interrompida"
-                : "Atualizando automaticamente…"}
-            </Card.Description>
-          </Card.Header>
-          <HistoricoLances lances={lote.bids} />
-        </Card>
+        {lote.status === "scheduled" ? (
+          <AberturaLances inicio={lote.startsAt} />
+        ) : (
+          <Card className="min-w-0 gap-4 rounded-3xl border border-emerald-900/10 p-5 sm:p-6">
+            <Card.Header className="gap-1 p-0">
+              <Card.Title className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+                <Icone nome="historico" />
+                Histórico de lances
+              </Card.Title>
+              <Card.Description>
+                {recurso.erro
+                  ? "Atualização interrompida"
+                  : "Atualizando automaticamente…"}
+              </Card.Description>
+            </Card.Header>
+            <HistoricoLances lances={lote.bids} />
+          </Card>
+        )}
       </Card.Content>
     </Card>
   );

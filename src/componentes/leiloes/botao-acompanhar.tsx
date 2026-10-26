@@ -17,7 +17,7 @@ export function BotaoAcompanhar({
       type="button"
       variant="secondary"
       size={compacto ? "sm" : "md"}
-      className="group min-h-11 min-w-11 shrink-0 gap-0 text-accent"
+      className={`group shrink-0 gap-0 text-accent ${compacto ? "min-h-8 min-w-8 h-8 px-2" : "min-h-11 min-w-11"}`}
       aria-pressed={selecionado}
       isDisabled={!pronto}
       aria-label={

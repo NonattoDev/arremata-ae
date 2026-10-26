@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { validarCpf } from "../lib/cpf";
 import type { BancoDados, Consultavel, LinhaBanco } from "./banco";
 
 import {
@@ -206,6 +207,9 @@ export class ServicoLeiloes {
     validarDinheiro(valor);
     return this.banco.transacionar(async (transacao) => {
       const usuarioBanco = await this.usuario(transacao, idUsuario, "bidder");
+      if (!usuarioBanco.cpf || !validarCpf(usuarioBanco.cpf) || !usuarioBanco.nascimento ||
+        new Date(usuarioBanco.nascimento).getTime() >= this.agora())
+        throw new ErroDominio("Complete seu CPF e sua data de nascimento antes de dar lance.", 403);
       await this.liquidarVencidos(transacao);
       const loteBanco = await this.lote(transacao, idLote);
       const agora = this.agora();
@@ -316,21 +320,23 @@ export class ServicoLeiloes {
     };
   }
   async listarLotes(idUsuario?: string, modo = "all") {
+    // A imagem tem sua própria rota; não precisamos transportar o base64 na listagem.
+    const campos = "id, seller_id, item - 'image' AS item, initial, increment, current_amount, bid_count, starts_at, ends_at, status, leader_id, receipt";
     return this.banco.transacionar(async (transacao) => {
       await this.liquidarVencidos(transacao);
       const lotes =
         modo === "seller"
           ? await transacao.busca(
-              "SELECT * FROM lots WHERE seller_id=$1 ORDER BY created_at DESC",
+              `SELECT ${campos} FROM lots WHERE seller_id=$1 ORDER BY created_at DESC`,
               [idUsuario],
             )
           : modo === "mine"
             ? await transacao.busca(
-                "SELECT * FROM lots WHERE id IN (SELECT lot_id FROM bids WHERE bidder_id=$1) ORDER BY created_at DESC",
+                `SELECT ${campos} FROM lots WHERE id IN (SELECT lot_id FROM bids WHERE bidder_id=$1) ORDER BY created_at DESC`,
                 [idUsuario],
               )
             : await transacao.busca(
-                "SELECT * FROM lots WHERE status != 'cancelled' ORDER BY created_at DESC",
+                `SELECT ${campos} FROM lots WHERE status != 'cancelled' ORDER BY created_at DESC`,
               );
       return lotes.map((loteBanco) => this.lotePublico(loteBanco, idUsuario));
     });
@@ -356,13 +362,31 @@ export class ServicoLeiloes {
       };
     });
   }
-  async auditar(id: string) {
+  async auditar(id: string, paginaSolicitada?: number) {
     return this.banco.transacionar(async (transacao) => {
       const loteBanco = await this.lote(transacao, id);
+      const auditoria = await this.integridade.auditarDados(
+        transacao,
+        loteBanco,
+      );
+      const porPagina = 25;
+      const total = auditoria.bids.length;
+      const totalPaginas = Math.max(1, Math.ceil(total / porPagina));
+      const pagina = Math.min(Math.max(1, paginaSolicitada ?? 1), totalPaginas);
+      const fim = Math.max(0, total - (pagina - 1) * porPagina);
       return {
         lotId: id,
         title: loteBanco.item.title,
-        ...(await this.integridade.auditarDados(transacao, loteBanco)),
+        ...auditoria,
+        bids:
+          paginaSolicitada === undefined
+            ? auditoria.bids
+            : auditoria.bids.slice(Math.max(0, fim - porPagina), fim),
+        total,
+        pagina,
+        totalPaginas,
+        porPagina,
+        verificadoEm: new Date(this.agora()).toISOString(),
       };
     });
   }

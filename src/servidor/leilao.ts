@@ -277,10 +277,11 @@ export class ServicoLeiloes {
       await this.integridade.exigirIntegridade(transacao, loteBanco);
       if (loteBanco.seller_id !== idUsuario)
         throw new ErroDominio("Sem permissão para este lote.", 403);
-      if (loteBanco.bid_count)
-        throw new ErroDominio("Lotes com lances não podem ser cancelados.");
+      if (loteBanco.status === "cancelled") return;
       if (loteBanco.status !== "open")
         throw new ErroDominio("Este lote já foi encerrado ou cancelado.");
+      // A reserva é calculada pelos lotes abertos. Cancelar libera o valor
+      // na mesma transação; creditar balance aqui duplicaria o dinheiro.
       await transacao.busca("UPDATE lots SET status='cancelled' WHERE id=$1", [
         idLote,
       ]);
@@ -314,7 +315,7 @@ export class ServicoLeiloes {
       startsAt: paraIso(loteBanco.starts_at),
       endsAt: paraIso(loteBanco.ends_at),
       status: situacao as string,
-      isLeader: !!idUsuario && loteBanco.leader_id === idUsuario,
+      isLeader: situacao !== "cancelled" && !!idUsuario && loteBanco.leader_id === idUsuario,
       isOwner: !!idUsuario && loteBanco.seller_id === idUsuario,
       hasWinner: !!loteBanco.receipt,
     };

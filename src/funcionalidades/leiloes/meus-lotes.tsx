@@ -1,8 +1,7 @@
 "use client";
 import { Icone } from "@/componentes/ui/icone";
 import { Button, Card, Chip, Link, Typography } from "@heroui/react";
-import { executarAcao } from "@/lib/executar-acao";
-import { cancelarLoteAcao } from "@/servidor/actions/lotes";
+import { CancelarLote } from "@/componentes/leiloes/cancelar-lote";
 
 import { useState } from "react";
 
@@ -26,20 +25,6 @@ export function MeusLotes({ usuario }: { usuario: Usuario }) {
   const { dados: lotes, erro, atualizar } = useRecurso<Lote[]>("mine", true);
   const [filtros, definirFiltros] = useState(filtrosIniciais);
   const filtrados = filtrarParticipacoes(lotes ?? [], filtros);
-  const [erroAcao, definirErroAcao] = useState(""),
-    [ocupado, definirOcupado] = useState("");
-  const cancelar = async (id: string) => {
-    definirOcupado(id);
-    definirErroAcao("");
-    try {
-      await executarAcao(() => cancelarLoteAcao(id));
-      await atualizar();
-    } catch (evento) {
-      definirErroAcao((evento as Error).message);
-    } finally {
-      definirOcupado("");
-    }
-  };
   return (
     <Card className="min-w-0 gap-6 p-5 sm:p-8">
       <Card.Content className="flex min-w-0 flex-col gap-4">
@@ -75,7 +60,7 @@ export function MeusLotes({ usuario }: { usuario: Usuario }) {
           )}
         </Typography.Paragraph>
       )}
-      {(erro || erroAcao) && <Aviso>{erro || erroAcao}</Aviso>}
+      {erro && <Aviso>{erro}</Aviso>}
       {!!lotes?.length && (
         <>
           <FiltrosMeusLotes
@@ -118,17 +103,8 @@ export function MeusLotes({ usuario }: { usuario: Usuario }) {
                   <IndicadorLideranca />
                 ) : null}
                 {usuario.role === "seller" &&
-                  ["live", "scheduled"].includes(loteBanco.status) &&
-                  loteBanco.bidCount === 0 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      isPending={ocupado === loteBanco.id}
-                      onPress={() => cancelar(loteBanco.id)}
-                    >
-                      <Icone nome="cancelar" />
-                      Cancelar lote
-                    </Button>
+                  ["live", "scheduled"].includes(loteBanco.status) && (
+                    <CancelarLote lote={loteBanco} aoCancelar={atualizar} />
                   )}
               </Card.Content>
             </CartaoLote>

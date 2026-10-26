@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { Button, Card, Chip, Form, Tabs, Typography } from "@heroui/react";
+import { Button, Card, Chip, Form, Tabs, Typography, toast } from "@heroui/react";
 import { CampoMoeda } from "@/componentes/ui/campo-moeda";
 import { Icone } from "@/componentes/ui/icone";
 import { Aviso } from "@/componentes/ui/aviso";
@@ -31,6 +31,7 @@ export function DepositarSaldo({
   const [cartao, definirCartao] = useState(cartaoVazio);
   const [id, definirId] = useState<string | null>(null);
   const [erro, definirErro] = useState("");
+  const [confirmado, definirConfirmado] = useState(false);
   const [ocupado, definirOcupado] = useState(false);
   const [agora, definirAgora] = useState(Date.now());
   const notificado = useRef("");
@@ -70,9 +71,19 @@ export function DepositarSaldo({
   useEffect(() => {
     if (
       deposito?.estado === "confirmed" &&
+      deposito.id === id &&
       notificado.current !== deposito.id
     ) {
       notificado.current = deposito.id;
+      toast.success("Depósito confirmado!", {
+        description: `${formatarReais(deposito.valor)} já estão disponíveis na sua carteira.`,
+        timeout: 5000,
+      });
+      definirConfirmado(true);
+      definirId(null);
+      try {
+        localStorage.removeItem(chave);
+      } catch {}
       void atualizar();
       void mutate(
         (chave) =>
@@ -81,10 +92,11 @@ export function DepositarSaldo({
           chave[1] === usuarioId,
       );
     }
-  }, [deposito, atualizar, mutate, usuarioId]);
+  }, [deposito, id, chave, atualizar, mutate, usuarioId]);
   const enviar = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
     definirErro("");
+    definirConfirmado(false);
     if (metodo === "card") {
       const falha = validarCartaoTeste(
         cartao.nome,
@@ -136,6 +148,11 @@ export function DepositarSaldo({
           Nenhuma cobrança real. Escolha como deseja testar o depósito.
         </Card.Description>
       </Card.Header>
+      {confirmado && (
+        <Aviso sucesso>
+          Depósito confirmado. Você já pode adicionar mais saldo.
+        </Aviso>
+      )}
       {!id ? (
         <Form onSubmit={enviar} className="flex flex-col gap-5">
           <CampoMoeda valor={valor} alterar={definirValor} disabled={ocupado} />
@@ -176,7 +193,7 @@ export function DepositarSaldo({
             <Tabs.Panel id="pix">
               <Card variant="secondary" className="gap-2 p-4">
                 <Icone nome="qr" className="text-accent" />
-                <Typography>QR Code e confirmação em 30 segundos.</Typography>
+                <Typography>QR Code e confirmação em 5 segundos.</Typography>
                 <Card.Description>
                   O saldo entra automaticamente ao concluir a simulação.
                 </Card.Description>
@@ -250,7 +267,7 @@ export function DepositarSaldo({
                 definirErro("");
               }}
             >
-              Voltar
+              Adicionar novo saldo
             </Button>
           )}
         </Card.Content>

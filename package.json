@@ -14,7 +14,8 @@
     "db:validate": "prisma validate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:seed": "tsx scripts/setup.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.11",

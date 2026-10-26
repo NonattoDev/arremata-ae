@@ -183,8 +183,8 @@ export function CriarLote({ usuario }: { usuario: Usuario }) {
           />
           <Typography.Paragraph size="sm">
             Ao publicar, salvamos os dados e a imagem da obra. Seu lote continua
-            disponível mesmo se a API estiver fora do ar. Lotes com lances não
-            podem ser cancelados.
+            disponível mesmo se a API estiver fora do ar. Ao cancelar antes do encerramento, os valores reservados
+            voltam automaticamente ao saldo disponível.
           </Typography.Paragraph>
           <Button type="submit" isDisabled={!selecionado} isPending={ocupado}>
             <Icone nome="adicionar" /> Publicar lote

@@ -3,7 +3,7 @@
 import { createContext, useContext, type ReactNode } from "react";
 import { useRecurso } from "@/hooks/use-recurso";
 import type { Usuario } from "@/tipos/leilao";
-import { RouterProvider, I18nProvider } from "@heroui/react";
+import { RouterProvider, I18nProvider, Toast } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { EscopoConsultas } from "./escopo-consultas";
 
@@ -19,6 +19,7 @@ export function ProvedorSessao({ children: filhos }: { children: ReactNode }) {
         <RouterProvider navigate={roteador.push}>
           <EscopoConsultas.Provider value={sessao.dados?.user?.id ?? null}>
             {filhos}
+            <Toast.Provider placement="top" />
           </EscopoConsultas.Provider>
         </RouterProvider>
       </I18nProvider>

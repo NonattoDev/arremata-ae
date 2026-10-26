@@ -97,12 +97,12 @@ A redação do anti-sniping comporta interpretação. Nossa implementação usa 
 
 - [x] Busca e filtro de lotes. A separação por status da vitrine e a busca na API para criar lote continuam obrigatórias.
 - [x] Tema claro e escuro.
-- [ ] Interface de cancelamento com estorno automático, caso esse opcional seja implementado também no backend.
+- [x] Interface de cancelamento com confirmação e liberação automática da reserva, inclusive com lances.
 
 ## Backend / infraestrutura — opcionais do PDF (p. 6)
 
-- [ ] Cancelamento de lote com estorno automático. Não confundir com o cancelamento obrigatório de lote sem lances.
-- [ ] Docker Compose.
+- [x] Cancelamento de lote com estorno automático da reserva, histórico preservado e operação idempotente. Cobertura em `tests/cancelamento.test.ts`.
+- [x] Docker Compose com aplicação, PostgreSQL, migrations, seed e liquidação periódica. Build Linux e execução do zero validados em 26/10/2026, incluindo login, depósito e persistência após reiniciar os serviços.
 - [x] Testes automatizados — podem cobrir tanto frontend quanto backend.
 
 ## Entrega e documentação — obrigatórios (p. 2, 5 e 7)

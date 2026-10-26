@@ -83,14 +83,14 @@ test("depósito simulado confirma uma vez, protege titular, respeita tempo e can
           contexto,
           deposito.id,
           "acompanhar",
-          agora + 29000,
+          agora + 4999,
         )
       ).estado,
       "pending",
     );
     await Promise.all([
-      processarDeposito(contexto, deposito.id, "qr", agora + 30000),
-      processarDeposito(contexto, deposito.id, "acompanhar", agora + 30000),
+      processarDeposito(contexto, deposito.id, "qr", agora + 5000),
+      processarDeposito(contexto, deposito.id, "acompanhar", agora + 5000),
     ]);
     assert.equal(
       Number(
@@ -115,7 +115,7 @@ test("depósito simulado confirma uma vez, protege titular, respeita tempo e can
     assert.equal(recibos.comprovantes[0].id, deposito.id);
     assert.equal(
       recibos.comprovantes[0].confirmadoEm,
-      new Date(agora + 30000).toISOString(),
+      new Date(agora + 5000).toISOString(),
     );
     assert.equal(
       (
@@ -140,7 +140,7 @@ test("depósito simulado confirma uma vez, protege titular, respeita tempo e can
     );
     await processarDeposito(contexto, cancelado.id, "cancelar", agora);
     assert.equal(
-      (await processarDeposito(contexto, cancelado.id, "qr", agora + 30000))
+      (await processarDeposito(contexto, cancelado.id, "qr", agora + 5000))
         .estado,
       "cancelled",
     );

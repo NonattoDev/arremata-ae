@@ -56,7 +56,7 @@ export async function iniciarDeposito(
         dados.valor,
         dados.metodo,
         new Date(agora),
-        new Date(agora + (dados.metodo === "pix" ? 30000 : 3000)),
+        new Date(agora + (dados.metodo === "pix" ? 5000 : 3000)),
         new Date(agora + 600000),
       ],
     );

@@ -24,10 +24,12 @@ export function FormularioLance({
   lote,
   atualizar,
   erroConsulta,
+  compacto = false,
 }: {
   lote: Sala;
   atualizar: () => Promise<void>;
   erroConsulta: string;
+  compacto?: boolean;
 }) {
   const sessao = useSessao();
   const usuario = sessao.dados?.user;
@@ -71,7 +73,10 @@ export function FormularioLance({
   };
   return (
     <>
-      <Form onSubmit={enviarLance} className="flex flex-col gap-4">
+      <Form
+        onSubmit={enviarLance}
+        className={compacto ? "flex flex-col gap-3" : "flex flex-col gap-4"}
+      >
         <Campo
           name="amount"
           label="Seu lance (R$)"
@@ -81,7 +86,11 @@ export function FormularioLance({
           step="0.01"
           value={valor}
           placeholder={(minimo / 100).toFixed(2)}
-          onChange={(evento) => definirValor(evento.target.value)}
+          onChange={(evento) => {
+            definirValor(evento.target.value);
+            definirMensagem("");
+            definirErro("");
+          }}
           disabled={lote.isLeader}
         />
         <Card.Content className="flex min-w-0 flex-row flex-wrap justify-between gap-2">
@@ -96,34 +105,36 @@ export function FormularioLance({
           type="submit"
           className="bg-[#a94328] text-white hover:bg-[#89351f]"
           fullWidth
-          size="lg"
+          size={compacto ? "sm" : "lg"}
           isPending={ocupado}
           isDisabled={lote.isLeader || !!erroConsulta}
         >
           <Icone nome={lote.isLeader ? "confirmar" : "leilao"} />
           {lote.isLeader ? "Você está na liderança" : "Confirmar lance"}
         </Button>
-        <Card.Content className="flex-row flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-secondary/60 p-3">
-          <Card.Content className="flex-none gap-1 p-0">
-            <Card.Description className="text-xs">
-              Saldo disponível
-            </Card.Description>
-            <Typography className="text-base font-semibold tabular-nums">
-              {carteira.dados ? formatarReais(carteira.dados.available) : "…"}
-            </Typography>
+        {!compacto && (
+          <Card.Content className="flex-row flex-wrap items-center justify-between gap-3 rounded-2xl bg-surface-secondary/60 p-3">
+            <Card.Content className="flex-none gap-1 p-0">
+              <Card.Description className="text-xs">
+                Saldo disponível
+              </Card.Description>
+              <Typography className="text-base font-semibold tabular-nums">
+                {carteira.dados ? formatarReais(carteira.dados.available) : "…"}
+              </Typography>
+            </Card.Content>
+            <Link
+              href="/carteira"
+              className={buttonVariants({
+                variant: "secondary",
+                size: "sm",
+                className: "min-h-11 gap-2 text-blue-800 dark:text-blue-200",
+              })}
+            >
+              <Icone nome="adicionar" />
+              Adicionar saldo
+            </Link>
           </Card.Content>
-          <Link
-            href="/carteira"
-            className={buttonVariants({
-              variant: "secondary",
-              size: "sm",
-              className: "min-h-11 gap-2 text-blue-800 dark:text-blue-200",
-            })}
-          >
-            <Icone nome="adicionar" />
-            Adicionar saldo
-          </Link>
-        </Card.Content>
+        )}
       </Form>
       {erro && <Aviso>{erro}</Aviso>}
       {mensagem && <Aviso sucesso>{mensagem}</Aviso>}

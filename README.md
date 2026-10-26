@@ -10,7 +10,55 @@ Publicado em **https://arremata-ae.vercel.app** na Vercel (NatosTech), com Postg
 
 Next.js 16 App Router, React 19, TypeScript, HeroUI 3 e Tailwind CSS 4. Back-end Node.js com Server Actions para mutações e Route Handlers para consultas/polling e compatibilidade HTTP. PostgreSQL via Prisma 7 e adapter `pg` em produção; PGlite (PostgreSQL WASM) para desenvolvimento/testes locais. Autenticação com scrypt, sessões opacas armazenadas por hash e cookies HttpOnly/SameSite, Secure em produção. Zod valida entradas; escritas verificam origem e tentativas são limitadas no banco.
 
-## Executar
+## Executar com Docker Compose (aplicação + banco)
+
+Requisito: Docker Desktop com containers Linux ou Docker Engine com Compose v2. Não é necessário instalar Node.js nem PostgreSQL no computador.
+
+```sh
+git clone https://github.com/NonattoDev/arremata-ae.git
+cd arremata-ae
+```
+
+Copie `.env.docker.example` para `.env.docker`:
+
+```powershell
+# Windows / PowerShell
+Copy-Item .env.docker.example .env.docker
+```
+
+```sh
+# Linux / macOS
+cp .env.docker.example .env.docker
+```
+
+Depois, em qualquer terminal:
+
+```sh
+docker compose --env-file .env.docker up --build -d
+docker compose --env-file .env.docker ps -a
+docker compose --env-file .env.docker logs -f preparar app liquidacao
+```
+
+Abra **http://localhost:4168** quando `preparar` terminar com código 0 e `app` estiver saudável. O primeiro build pode levar alguns minutos. A preparação aguarda o PostgreSQL, aplica todas as migrations e cria as contas e três lotes de exemplo. O serviço `liquidacao` encerra lotes vencidos a cada minuto, mesmo sem ninguém acessar o site.
+
+Entre com `leiloeiro@arremata.test`, `ana@arremata.test` ou `bruno@arremata.test`. A senha inicial do exemplo é `Arremata-Demo-2026!`, definida em `DEMO_PASSWORD`. Os licitantes começam com R$ 5.000 de saldo simulado. Antes de dar lances, complete CPF e nascimento no modal; para avaliação local use dados fictícios, por exemplo CPF de teste `529.982.247-25` e nascimento `01/01/1990`. Não informe dados pessoais reais.
+
+Se a porta estiver ocupada, altere `PORTA_APP=4169` no `.env.docker`, repita `up -d` e acesse `http://localhost:4169`. A publicação fica restrita ao próprio computador. O PostgreSQL não expõe uma porta ao host.
+
+O build requer internet para imagens Docker, npm e fontes; o primeiro seed consulta o museu. Se a preparação falhar, confira `logs preparar`, corrija a causa e execute novamente `up --build -d`. A aplicação não inicia enquanto a preparação não terminar com sucesso.
+
+```sh
+# Parar sem apagar os dados
+docker compose --env-file .env.docker down
+# Iniciar novamente
+docker compose --env-file .env.docker up -d
+```
+
+Os dados ficam no volume `dados-postgres`. **Não use `down -v` para uma parada normal: isso apaga o banco.** Preserve também `AUDIT_SECRET` junto ao volume: trocar a chave invalida a auditoria dos lotes existentes. Reexecutar o seed não redefine senhas nem repõe saldos. As credenciais do exemplo são apenas para avaliação local; não reutilize em produção. Se personalizar a senha do banco, use letras e números para mantê-la compatível com a URL de conexão.
+
+A imagem inclui Prisma CLI e `tsx` para executar migrations, seed e liquidação. Arquivos `.env`, dados locais e credenciais do host não entram na imagem.
+
+## Executar sem Docker
 
 Requisitos: Node.js 24 e npm.
 
@@ -51,7 +99,7 @@ Defina `DATABASE_URL`, execute `npm run db:migrate` e depois `npm run db:setup` 
 
 - Vitrine: ao vivo, agendados e encerrados; cancelados ocultos; busca por obra/artista.
 - Leiloeiro busca API pública, publica lotes com início/fim, lance inicial/incremento e gerencia somente os próprios lotes. Não pode dar lances.
-- Cancelamento básico somente sem lances e antes de encerrar.
+- Cancelamento pelo dono do lote, antes do encerramento, inclusive com lances. A confirmação libera automaticamente a reserva do líder e retira o lote da vitrine, preservando os lances e a auditoria. Repetir o cancelamento não duplica valores. Como a reserva ainda não foi debitada, o estorno é uma liberação de saldo, não um novo depósito. Lotes encerrados não podem ser cancelados.
 - Licitante deposita saldo simulado, vê total/comprometido/disponível e participa de vários lotes.
 - Primeiro lance >= inicial; seguintes >= atual + incremento. Líder não cobre o próprio lance.
 - Início inclusivo, fim exclusivo; relógio do servidor decide.

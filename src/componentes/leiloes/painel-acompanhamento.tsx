@@ -5,6 +5,7 @@ import { Icone } from "@/componentes/ui/icone";
 import { Aviso } from "@/componentes/ui/aviso";
 import { LoteAcompanhado } from "./lote-acompanhado";
 import { BotaoSomLances } from "./botao-som-lances";
+import { SaldoMiniplayer } from "./saldo-miniplayer";
 
 export function PainelAcompanhamento() {
   const { ids, recolhido, alternar, remover, aviso } = useAcompanhamento();
@@ -41,6 +42,7 @@ export function PainelAcompanhamento() {
         </Button>
       </Card.Header>
       {aviso && <Aviso>{aviso}</Aviso>}
+      {!recolhido && <SaldoMiniplayer />}
       <Card.Content
         id="lotes-acompanhados"
         className={

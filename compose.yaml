@@ -1,0 +1,66 @@
+name: arremata-ae
+
+x-aplicacao: &aplicacao
+  image: arremata-ae:local
+  build: .
+  environment: &ambiente
+    DATABASE_URL: postgresql://arremata:${POSTGRES_PASSWORD:?Copie .env.docker.example para .env.docker}@banco:5432/arremata
+    AUDIT_SECRET: ${AUDIT_SECRET:?Defina AUDIT_SECRET em .env.docker}
+    CRON_SECRET: ${CRON_SECRET:?Defina CRON_SECRET em .env.docker}
+    DEMO_PASSWORD: ${DEMO_PASSWORD:?Defina DEMO_PASSWORD em .env.docker}
+    APP_URL: http://localhost:${PORTA_APP:-4168}
+
+services:
+  banco:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: arremata
+      POSTGRES_USER: arremata
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD}
+    volumes:
+      - dados-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arremata -d arremata"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  preparar:
+    <<: *aplicacao
+    command: ["sh", "-c", "npm run db:migrate && npm run db:seed"]
+    depends_on:
+      banco:
+        condition: service_healthy
+
+  app:
+    <<: *aplicacao
+    ports:
+      - "127.0.0.1:${PORTA_APP:-4168}:4168"
+    depends_on:
+      preparar:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4168/entrar').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  liquidacao:
+    <<: *aplicacao
+    command: ["npx", "tsx", "scripts/liquidar-periodicamente.ts"]
+    depends_on:
+      preparar:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  dados-postgres:

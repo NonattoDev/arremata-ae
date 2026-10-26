@@ -163,7 +163,7 @@ test("valida mínimo, saldo e liderança, liberando a reserva de quem foi supera
   await servico.darLance(bruno, id, 11000);
   assert.equal((await servico.carteira(ana)).committed, 0);
   assert.equal((await servico.carteira(bruno)).available, 89000);
-  await assert.rejects(servico.cancelar(leiloeiro, id), /lances/i);
+  assert.equal((await servico.obterLote(id)).bidCount, 2);
 });
 test("recusa valores inválidos e lances antecipados, aceitando o instante de abertura", async () => {
   await assert.rejects(servico.depositar(ana, -1), /valor/i);

@@ -154,3 +154,23 @@ Commit 8b425bf publicado no GitHub pessoal e deploy Vercel dpl_D7byTETGeiRUuF6LX
 - Comprovante do lote público de smoke retornou HTTP 200, R$ 110, auditoria íntegra com dois lances, sem e-mail de licitante; repetição preservou o mesmo comprovante. A aplicação também liquida vencidos nas leituras: esta observação comprova encerramento via aplicação, não isola a execução do agendador.
 - Configuração ativa de cron conferida pela API da Vercel: habilitado, associado ao deploy f8062eb, rota /api/cron/settle a cada minuto. Consulta ao conector de logs não retornou eventos nesta janela; a evidência de execução real anterior de 22/10 permanece histórica.
 - Revisão pessoal e envio do formulário continuam pendentes. Não houve envio automático do desafio.
+
+
+## 26/10/2026 — cancelamento com estorno e Docker Compose
+
+- Cancelamento pelo dono do lote, inclusive com lances, com confirmação HeroUI no painel. Libera a reserva sem criar crédito: o valor ainda não havia sido debitado. Histórico e checkpoint continuam íntegros. Lotes encerrados não podem ser cancelados.
+- `npm test`: 34 testes passaram, zero falhas. O novo teste de cancelamento verifica liberação da reserva, preservação da reserva de outro lote, ausência de crédito ao vendedor, repetição idempotente, lance concorrente, recusa após encerramento e auditoria preservada.
+- `npm run typecheck`: aprovado.
+- `npm run build -- --webpack`: aprovado em cópia isolada, sem arquivos `.env` e sem interromper o servidor local. Não equivale à execução da imagem Linux.
+- Compose inclui PostgreSQL 17 com volume persistente e healthcheck, preparação com migrations e seed, aplicação e processo de liquidação a cada minuto. README inclui instalação do zero, contas de avaliação, porta alternativa, logs e preservação dos dados.
+- A validação inicial acima precedeu a instalação do Docker. A execução real foi concluída na rodada descrita abaixo; a interface de confirmação de cancelamento não foi exercitada por cliques nessa rodada inicial.
+
+## 26/10/2026 — execução do README com Docker
+
+- Docker Desktop com backend WSL2: build Linux concluído em cópia isolada do código, sem `.env` nem banco do desenvolvimento. Porta alternativa 4169, mantendo a aplicação original na 4168.
+- `docker compose --env-file .env.docker up --build -d`: PostgreSQL 17 criado em volume novo, migrations aplicadas e seed de três usuários e três lotes. Preparação terminou com código 0; aplicação e banco saudáveis, processo de liquidação iniciado.
+- Build de produção Next.js com webpack e TypeScript aprovado dentro da imagem Linux.
+- `docker compose --env-file .env.docker exec -T app npm test`: 34 testes aprovados, zero falhas. Os testes mantêm seus próprios adapters/bancos de teste; isso não equivale a 34 testes de integração no PostgreSQL do Compose.
+- Por cliques no navegador: login de Ana com a conta do README, saldo inicial de R$ 5.000, depósito Pix simulado de R$ 100, confirmação, saldo de R$ 5.100 e comprovante.
+- `down` sem `-v`, seguido de `up -d`: sessão, saldo de R$ 5.100 e comprovante preservados, sem duplicar crédito nem reinicializar o saldo.
+- O worker registrou execução sem lotes vencidos. Esta rodada comprova sua inicialização, não uma liquidação real pelo agendador. O banco original e o ambiente publicado não foram alterados por este teste.

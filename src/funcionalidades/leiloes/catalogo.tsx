@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Chip, Typography, Tabs } from "@heroui/react";
+import { Card, Chip, Typography, Tabs, Accordion } from "@heroui/react";
 import { useState } from "react";
 import { Icone, type NomeIcone } from "@/componentes/ui/icone";
 import type { Lote } from "@/tipos/leilao";
@@ -26,6 +26,10 @@ const normalizarBusca = (texto: string) =>
 
 export function CatalogoLeiloes() {
   const { dados: lotes, erro } = useRecurso<Lote[]>("lots", true);
+  const [minimo, definirMinimo] = useState("");
+  const [maximo, definirMaximo] = useState("");
+  const preco = (lote: Lote) => lote.currentAmount || lote.initial;
+  const teto = Math.max(100, ...(lotes ?? []).map(preco));
   const [aba, definirAba] = useState("live");
   const [busca, definirBusca] = useState("");
   const [artista, definirArtista] = useState("");
@@ -39,6 +43,8 @@ export function CatalogoLeiloes() {
   const [ordem, definirOrdem] = useState<OrdenacaoCatalogo>("prazo");
   const encontrados = (lotes ?? []).filter(
     (lote) =>
+      (minimo === "" || preco(lote) >= Math.round(Number(minimo) * 100)) &&
+      (maximo === "" || preco(lote) <= Math.round(Number(maximo) * 100)) &&
       (!artista || lote.item.artist === artista) &&
       (!data || lote.item.date === data) &&
       normalizarBusca(`${lote.item.title} ${lote.item.artist}`).includes(
@@ -48,10 +54,8 @@ export function CatalogoLeiloes() {
   const visiveis = encontrados
     .filter((lote) => lote.status === aba)
     .sort((primeiro, segundo) => {
-      if (ordem === "menor")
-        return primeiro.currentAmount - segundo.currentAmount;
-      if (ordem === "maior")
-        return segundo.currentAmount - primeiro.currentAmount;
+      if (ordem === "menor") return preco(primeiro) - preco(segundo);
+      if (ordem === "maior") return preco(segundo) - preco(primeiro);
       if (ordem === "disputados") return segundo.bidCount - primeiro.bidCount;
       if (aba === "scheduled")
         return (
@@ -63,6 +67,35 @@ export function CatalogoLeiloes() {
         dataLocal(segundo.endsAt).valueOf();
       return aba === "closed" ? -diferenca : diferenca;
     });
+  const filtros = (
+    <FiltrosCatalogo
+      minimo={minimo}
+      maximo={maximo}
+      teto={teto}
+      aoPreco={(menor, maior) => {
+        definirMinimo(menor);
+        definirMaximo(maior);
+      }}
+      artistas={artistas}
+      datas={datas}
+      artista={artista}
+      data={data}
+      aoArtista={definirArtista}
+      aoData={definirData}
+      aoLimpar={() => {
+        definirMinimo("");
+        definirMaximo("");
+        definirBusca("");
+        definirArtista("");
+        definirData("");
+        definirOrdem("prazo");
+      }}
+      busca={busca}
+      aoBuscar={definirBusca}
+      ordem={ordem}
+      aoOrdenar={definirOrdem}
+    />
+  );
   return (
     <Card variant="transparent" className="gap-6 p-0">
       <Card.Header className="flex-row items-center gap-4 px-0 py-3">
@@ -85,26 +118,28 @@ export function CatalogoLeiloes() {
           </Card.Description>
         </Card.Content>
       </Card.Header>
-      <Card.Content id="leiloes" className="flex min-w-0 flex-col gap-6 p-0">
-        <FiltrosCatalogo
-          artistas={artistas}
-          datas={datas}
-          artista={artista}
-          data={data}
-          aoArtista={definirArtista}
-          aoData={definirData}
-          aoLimpar={() => {
-            definirBusca("");
-            definirArtista("");
-            definirData("");
-            definirOrdem("prazo");
-          }}
-          busca={busca}
-          aoBuscar={definirBusca}
-          ordem={ordem}
-          aoOrdenar={definirOrdem}
-        />
+      <Card.Content
+        id="leiloes"
+        className="grid min-w-0 items-start gap-6 p-0 lg:grid-cols-[260px_minmax(0,1fr)]"
+      >
+        <Card.Content className="min-w-0 p-0">
+          <Card.Content className="hidden p-0 lg:flex">{filtros}</Card.Content>
+          <Accordion className="lg:hidden">
+            <Accordion.Item id="filtros">
+              <Accordion.Heading>
+                <Accordion.Trigger>
+                  Filtrar e ordenar
+                  <Accordion.Indicator />
+                </Accordion.Trigger>
+              </Accordion.Heading>
+              <Accordion.Panel>
+                <Accordion.Body>{filtros}</Accordion.Body>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </Accordion>
+        </Card.Content>
         <Tabs
+          className="min-w-0"
           selectedKey={aba}
           onSelectionChange={(chave) => definirAba(String(chave))}
         >
@@ -142,7 +177,15 @@ export function CatalogoLeiloes() {
                 <Carregando />
               ) : visiveis.length ? (
                 <GradeProgressiva
-                  key={JSON.stringify([aba, busca, artista, data, ordem])}
+                  key={JSON.stringify([
+                    aba,
+                    busca,
+                    artista,
+                    data,
+                    ordem,
+                    minimo,
+                    maximo,
+                  ])}
                   lotes={visiveis}
                 />
               ) : (

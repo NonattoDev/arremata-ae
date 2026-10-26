@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Card, InputGroup, Label, SearchField } from "@heroui/react";
+import { FiltroPreco } from "@/componentes/leiloes/filtro-preco";
 import { Icone } from "@/componentes/ui/icone";
 
 import { SeletorCatalogo } from "./seletor-catalogo";
@@ -13,6 +14,10 @@ export const ordenacoesCatalogo = {
 export type OrdenacaoCatalogo = keyof typeof ordenacoesCatalogo;
 
 export function FiltrosCatalogo({
+  minimo,
+  maximo,
+  teto,
+  aoPreco,
   busca,
   aoBuscar,
   ordem,
@@ -25,6 +30,10 @@ export function FiltrosCatalogo({
   aoData,
   aoLimpar,
 }: {
+  minimo: string;
+  maximo: string;
+  teto: number;
+  aoPreco: (minimo: string, maximo: string) => void;
   artistas: string[];
   datas: string[];
   artista: string;
@@ -62,7 +71,7 @@ export function FiltrosCatalogo({
             )}
           </InputGroup>
         </SearchField>
-        <Card.Content className="grid min-w-0 gap-4 p-0 sm:grid-cols-3">
+        <Card.Content className="grid min-w-0 gap-4 p-0 ">
           <SeletorCatalogo
             rotulo="Artista"
             icone="pessoa"
@@ -93,7 +102,18 @@ export function FiltrosCatalogo({
             )}
           />
         </Card.Content>
-        {(busca || artista || data || ordem !== "prazo") && (
+        <FiltroPreco
+          minimo={minimo}
+          maximo={maximo}
+          teto={teto}
+          aoAlterar={aoPreco}
+        />
+        {(busca ||
+          artista ||
+          data ||
+          minimo ||
+          maximo ||
+          ordem !== "prazo") && (
           <Button
             variant="ghost"
             size="sm"

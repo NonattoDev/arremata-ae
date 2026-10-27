@@ -166,7 +166,7 @@ export function CatalogoLeiloes() {
                 <Tabs.Tab
                   key={chave}
                   id={chave}
-                  className="min-h-12 min-w-0 flex-col gap-1 px-2 py-2 text-xs sm:flex-row sm:gap-2 sm:px-4 sm:text-sm"
+                  className={`h-auto min-h-12 min-w-0 flex-col gap-1 px-2 py-2 text-xs sm:flex-row sm:gap-2 sm:px-4 sm:text-sm ${aba === chave ? `${coresCategorias[chave].destaque} shadow-sm` : ""}`}
                 >
                   <Icone
                     nome={icone}
@@ -178,7 +178,6 @@ export function CatalogoLeiloes() {
                     {rotulo} ·{" "}
                     {encontrados.filter((lote) => lote.status === chave).length}
                   </Chip.Label>
-                  <Tabs.Indicator className={coresCategorias[chave].destaque} />
                 </Tabs.Tab>
               ))}
             </Tabs.List>

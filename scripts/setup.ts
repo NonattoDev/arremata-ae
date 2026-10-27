@@ -31,8 +31,15 @@ async function principal() {
           await gerarHashSenha(senha),
           papel,
         ));
-      if (!existente && papel === "bidder")
+      if (!existente && papel === "bidder") {
+        // Somente contas demonstrativas novas recebem a identidade fictícia.
+        // Não sobrescrever CPF/nascimento de contas já existentes no seed.
+        await banco.busca(
+          "UPDATE users SET cpf=$1, nascimento=$2::date WHERE id=$3",
+          ["52998224725", "1990-01-01", usuarios[nome]],
+        );
         await servico.depositar(usuarios[nome], 500000);
+      }
     }
     const [ativo] = await banco.busca(
       "SELECT id FROM lots WHERE status='open' AND ends_at > now() LIMIT 1",

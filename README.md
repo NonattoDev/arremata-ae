@@ -41,7 +41,7 @@ docker compose --env-file .env.docker logs -f preparar app liquidacao
 
 Abra **http://localhost:4168** quando `preparar` terminar com código 0 e `app` estiver saudável. O primeiro build pode levar alguns minutos. A preparação aguarda o PostgreSQL, aplica todas as migrations e cria as contas e três lotes de exemplo. O serviço `liquidacao` encerra lotes vencidos a cada minuto, mesmo sem ninguém acessar o site.
 
-Entre com `leiloeiro@arremata.test`, `ana@arremata.test` ou `bruno@arremata.test`. A senha inicial do exemplo é `Arremata-Demo-2026!`, definida em `DEMO_PASSWORD`. Os licitantes começam com R$ 5.000 de saldo simulado. Antes de dar lances, complete CPF e nascimento no modal; para avaliação local use dados fictícios, por exemplo CPF de teste `529.982.247-25` e nascimento `01/01/1990`. Não informe dados pessoais reais.
+Entre com `leiloeiro@arremata.test`, `ana@arremata.test` ou `bruno@arremata.test`. A senha inicial do exemplo é `Arremata-Demo-2026!`, definida em `DEMO_PASSWORD`. Os licitantes começam com R$ 5.000 de saldo simulado. Contas de demonstração novas já recebem CPF de teste `529.982.247-25` e nascimento `01/01/1990`, ficando prontas para os lances e o smoke. Contas existentes não têm a identidade alterada pelo seed: se estiverem incompletas, preencha esses dados fictícios no modal antes de dar lances ou executar o smoke. Novos cadastros pela interface continuam exigindo essa etapa. Não informe dados pessoais reais.
 
 Se a porta estiver ocupada, altere `PORTA_APP=4169` no `.env.docker`, repita `up -d` e acesse `http://localhost:4169`. A publicação fica restrita ao próprio computador. O PostgreSQL não expõe uma porta ao host.
 
@@ -145,9 +145,22 @@ npm run typecheck
 npm run build
 ```
 
+Para quem instalou somente com Docker, execute as verificações dentro do serviço, com o usuário padrão `node` (sem root):
+
+```sh
+docker compose --env-file .env.docker exec app npm test
+docker compose --env-file .env.docker exec app npm run typecheck
+# Build em container descartável, sem alterar o app que está rodando:
+docker compose --env-file .env.docker run --rm --no-deps app npm run build
+# Smoke mutável: execute apenas na instalação local isolada de avaliação.
+docker compose --env-file .env.docker exec -e SMOKE_BASE_URL=http://localhost:4168 app npx tsx scripts/smoke.ts
+```
+
+No smoke acima, `localhost:4168` é a porta **interna do container**, mesmo se `PORTA_APP` tiver outro valor no host. `DEMO_PASSWORD` já vem do `.env.docker`.
+
 Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre lotes, concorrência local, anti-sniping, liquidação, cancelamento, privacidade e adulteração direta no SQL. Um teste adicional percorre Prisma → pg → protocolo PostgreSQL → PGlite para comprovar persistência, rollback, liquidação e auditoria. A suíte de domínio também foi executada em uma branch isolada do Neon, usando conexões Prisma independentes nas disputas e na liquidação concorrente. Evidências/pendências em `docs/VALIDACAO.md`.
 
-Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplicada**, defina `POSTGRES_TEST_URL` e execute `npx tsx --test tests/auction.test.ts`. A suíte cria dados e adultera históricos deliberadamente: nunca usar a base publicada. Para smoke HTTP, `SMOKE_BASE_URL` seleciona explicitamente o destino e `DEMO_PASSWORD` autentica as contas sintéticas: `npx tsx scripts/smoke.ts`. Esse smoke cria um lote e movimenta saldo simulado.
+Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplicada**, defina `POSTGRES_TEST_URL` e execute `npx tsx --test tests/auction.test.ts`. A suíte cria dados e adultera históricos deliberadamente: nunca usar a base publicada. Para smoke HTTP fora do Docker, defina obrigatoriamente `SMOKE_BASE_URL` com o destino isolado e `DEMO_PASSWORD` com a senha das contas sintéticas e execute `npx tsx scripts/smoke.ts`. O smoke verifica CPF/nascimento antes de criar dados; contas antigas incompletas devem ser completadas pela interface. Ele adiciona R$ 10 à carteira de Ana, cria um lote, testa disputa/reserva, cancela duas vezes para conferir estorno idempotente e preservação da auditoria. O lote de teste permanece cancelado, sem reserva pendente. Não execute esse smoke na produção.
 
 ## Organização e uso de IA
 

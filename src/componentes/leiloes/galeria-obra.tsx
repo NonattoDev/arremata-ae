@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Button, Card, Link, Modal, buttonVariants } from "@heroui/react";
 import type { Lote } from "@/tipos/leilao";
 import { Icone } from "@/componentes/ui/icone";
-import { VisualizadorObra } from "./visualizador-obra";
+import { FichaAcervo } from "./ficha-acervo";
 import { ImagemObra } from "./imagem-obra";
 import { HistoriaObra } from "./historia-obra";
 
@@ -56,7 +56,9 @@ export function GaleriaObra({
                 </Card.Description>
               </Modal.Header>
               <Modal.Body className="gap-4">
-                <VisualizadorObra
+                <FichaAcervo
+                  galeria
+                  identificador={lote.item.externalId}
                   key={String(aberta)}
                   imagem={lote.item.image}
                   titulo={lote.item.title}

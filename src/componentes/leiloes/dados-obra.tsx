@@ -1,3 +1,4 @@
+import { FichaAcervo } from "./ficha-acervo";
 import { Icone } from "@/componentes/ui/icone";
 import { Card, Link, Typography } from "@heroui/react";
 import type { Lote } from "@/tipos/leilao";
@@ -21,6 +22,11 @@ export function DadosObra({ lote }: { lote: Lote }) {
         <Icone nome="imagem" /> Sobre a obra
       </Card.Title>
       <HistoriaObra identificador={lote.item.externalId} />
+      <FichaAcervo
+        identificador={lote.item.externalId}
+        imagem={lote.item.image}
+        titulo={lote.item.title}
+      />
       <Card.Content className="grid min-w-0 gap-5 sm:grid-cols-2">
         {detalhes.map(([rotulo, valor]) => (
           <Card.Content key={rotulo} className="min-w-0 gap-1">

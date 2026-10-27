@@ -35,9 +35,6 @@ export function PaginaInicial() {
               <Icone nome="leilao" className="text-accent" />
               Em leilão agora
             </Typography.Heading>
-            <Card.Description>
-              Os mais disputados primeiro. Explore os destaques ou veja todos no catálogo.
-            </Card.Description>
           </Card.Content>
           <Link
             href="/leiloes"

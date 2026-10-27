@@ -12,6 +12,7 @@ RUN npm run build -- --webpack
 
 FROM base AS execucao
 WORKDIR /app
+RUN chown node:node /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1
 COPY --from=construcao --chown=node:node /app /app
 USER node

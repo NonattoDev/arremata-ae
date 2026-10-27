@@ -7,7 +7,7 @@ export function PrazoLote({ lote }: { lote: Lote }) {
   const aoVivo = lote.status === "live";
   const agendado = lote.status === "scheduled";
   if (lote.status === "cancelled") {
-    return <Card.Description>Cancelado sem lances</Card.Description>;
+    return <Card.Description>Cancelado</Card.Description>;
   }
   return (
     <Surface

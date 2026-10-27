@@ -15,6 +15,7 @@ import { useRecurso } from "@/hooks/use-recurso";
 import { Aviso } from "@/componentes/ui/aviso";
 import { Carregando } from "@/componentes/ui/carregando";
 import { Compartilhar } from "@/componentes/ui/compartilhar";
+import { apelidoParticipante } from "@/lib/apelido-participante";
 
 function DadoComprovante({
   icone,
@@ -130,7 +131,7 @@ export function Comprovante({ id }: { id: string }) {
             <DadoComprovante
               icone="pessoa"
               rotulo="Arrematante"
-              valor={dados.winner}
+              valor={apelidoParticipante(dados.winner)}
             />
             <DadoComprovante
               icone="tempo"

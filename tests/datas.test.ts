@@ -5,6 +5,7 @@ import {
   dataLocal,
   formatarData,
   formatarDataHora,
+  formatarDataAcervo,
 } from "../src/lib/datas";
 
 test("conversão de datas preserva o instante informado com fuso", () => {
@@ -19,6 +20,15 @@ test("conversão de datas preserva o instante informado com fuso", () => {
     ),
     120,
   );
+});
+
+test("datas do acervo são legíveis sem alterar períodos históricos", () => {
+  assert.equal(formatarDataAcervo("1964-12-08T05:00:00"), "08/12/1964, 05:00:00");
+  assert.equal(formatarDataAcervo("1964-12-08"), "08/12/1964");
+  assert.equal(formatarDataAcervo("2026-10-22T18:17:00-03:00"), formatarDataHora("2026-10-22T18:17:00-03:00"));
+  for (const valor of ["1877", "c. 1915–26", "2026-02-30", "1964-12-08T25:00:00", "https://museu.org/1964-12-08", "Exposição em 1964", ""]) {
+    assert.equal(formatarDataAcervo(valor), valor);
+  }
 });
 
 test("datas locais são apresentadas em português", () => {

@@ -1,4 +1,5 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 import { Icone, type NomeIcone } from "@/componentes/ui/icone";
 import { ImagemObra } from "@/componentes/leiloes/imagem-obra";
 import {
@@ -105,7 +106,7 @@ export function Comprovante({ id }: { id: string }) {
             </Card.Content>
             <Card.Content className="gap-2 p-0">
               <Card.Description className="text-xs">
-                {dados.item.artist} · {dados.item.date}
+                {dados.item.artist} · {formatarDataAcervo(dados.item.date ?? "")}
               </Card.Description>
               <Typography.Heading
                 level={2}

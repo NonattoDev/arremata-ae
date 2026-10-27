@@ -1,4 +1,5 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 
 import {
   Card,
@@ -72,7 +73,7 @@ export function CartaoLote({
       </Card.Content>
       <Card.Header className="gap-1 px-5 pb-4 pt-5">
         <Card.Description>
-          {lote.item.artist} · {lote.item.date}
+          {lote.item.artist} · {formatarDataAcervo(lote.item.date ?? "")}
         </Card.Description>
         <Card.Title className="min-h-14 text-lg font-semibold leading-7">
           <Link

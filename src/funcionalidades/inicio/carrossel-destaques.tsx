@@ -1,4 +1,5 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 import { useEffect, useState } from "react";
 import { Button, Card, Chip, Link, buttonVariants } from "@heroui/react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -48,7 +49,7 @@ export function CarrosselDestaques({ lotes }: { lotes: Lote[] }) {
             Em destaque
           </Chip>
         )}
-        <Card.Description>{lote.item.date}</Card.Description>
+        <Card.Description>{formatarDataAcervo(lote.item.date ?? "")}</Card.Description>
       </Card.Header>
       <AnimatePresence mode="wait" initial={false}>
         <ConteudoAnimado

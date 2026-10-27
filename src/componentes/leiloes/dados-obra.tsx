@@ -1,3 +1,4 @@
+import { formatarDataAcervo } from "@/lib/datas";
 import { FichaAcervo } from "./ficha-acervo";
 import { Icone } from "@/componentes/ui/icone";
 import { Card, Link, Typography } from "@heroui/react";
@@ -8,7 +9,7 @@ import { HistoriaObra } from "./historia-obra";
 export function DadosObra({ lote }: { lote: Lote }) {
   const detalhes = [
     ["Artista", lote.item.artist],
-    ["Data da obra", lote.item.date],
+    ["Data da obra", formatarDataAcervo(lote.item.date ?? "")],
     ["Início", formatarDataHora(lote.startsAt)],
     ["Encerramento previsto", formatarDataHora(lote.endsAt)],
   ];

@@ -1,4 +1,5 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 import {
   Card,
   Chip,
@@ -41,7 +42,7 @@ export function SalaLote({ id }: { id: string }) {
         <Card.Content className="w-full min-w-0 gap-2 sm:w-auto">
           <Card.Description className="flex items-center gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-300">
             <Icone nome="pessoa" />
-            {lote.item.artist} · {lote.item.date}
+            {lote.item.artist} · {formatarDataAcervo(lote.item.date ?? "")}
           </Card.Description>
           <Typography.Heading
             level={1}

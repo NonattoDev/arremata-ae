@@ -1,6 +1,7 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 
-import { Button, Card, InputGroup, Label, SearchField } from "@heroui/react";
+import { Button, Card, Label, SearchField } from "@heroui/react";
 import { FiltroPreco } from "@/componentes/leiloes/filtro-preco";
 import { Icone } from "@/componentes/ui/icone";
 
@@ -51,25 +52,13 @@ export function FiltrosCatalogo({
       <Card.Content className="grid min-w-0 gap-4 p-0 sm:items-end">
         <SearchField value={busca} onChange={aoBuscar} className="min-w-0">
           <Label>Buscar no catálogo</Label>
-          <InputGroup fullWidth className="min-h-12">
-            <InputGroup.Prefix>
+          <SearchField.Group className="min-h-12">
+            <SearchField.SearchIcon>
               <Icone nome="buscar" />
-            </InputGroup.Prefix>
-            <InputGroup.Input placeholder="Nome da obra ou artista" />
-            {busca && (
-              <InputGroup.Suffix>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="ghost"
-                  aria-label="Limpar busca"
-                  onPress={() => aoBuscar("")}
-                >
-                  <Icone nome="fechar" />
-                </Button>
-              </InputGroup.Suffix>
-            )}
-          </InputGroup>
+            </SearchField.SearchIcon>
+            <SearchField.Input placeholder="Nome da obra ou artista" />
+            <SearchField.ClearButton aria-label="Limpar busca" />
+          </SearchField.Group>
         </SearchField>
         <Card.Content className="grid min-w-0 gap-4 p-0 ">
           <SeletorCatalogo
@@ -89,7 +78,7 @@ export function FiltrosCatalogo({
             aoSelecionar={aoData}
             opcoes={[
               { valor: "", rotulo: "Todas as datas" },
-              ...datas.map((ano) => ({ valor: ano, rotulo: ano })),
+              ...datas.map((ano) => ({ valor: ano, rotulo: formatarDataAcervo(ano) })),
             ]}
           />
           <SeletorCatalogo

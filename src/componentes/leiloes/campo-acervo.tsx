@@ -1,5 +1,6 @@
 "use client";
 import { Card, Link, Typography } from "@heroui/react";
+import { formatarDataAcervo } from "@/lib/datas";
 
 export function preenchido(valor: unknown): boolean {
   if (valor === null || valor === undefined || valor === "") return false;
@@ -105,7 +106,7 @@ export function CampoAcervo({
         </Link>
       ) : (
         <Typography className="break-words whitespace-pre-wrap">
-          {texto}
+          {formatarDataAcervo(texto)}
         </Typography>
       )}
     </Card.Content>

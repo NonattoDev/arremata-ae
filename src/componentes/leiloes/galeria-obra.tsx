@@ -1,4 +1,5 @@
 "use client";
+import { formatarDataAcervo } from "@/lib/datas";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, Link, Modal, buttonVariants } from "@heroui/react";
@@ -50,9 +51,12 @@ export function GaleriaObra({
                 <Icone nome="fechar" />
               </Modal.CloseTrigger>
               <Modal.Header className="pr-10">
-                <Modal.Heading>{lote.item.title}</Modal.Heading>
+                <Modal.Heading>
+                  {lote.item.title}
+                </Modal.Heading>
                 <Card.Description>
-                  {lote.item.artist} · {lote.item.date}
+                  {lote.item.artist} ·{" "}
+                  {formatarDataAcervo(lote.item.date ?? "")}
                 </Card.Description>
               </Modal.Header>
               <Modal.Body className="gap-4">
@@ -74,24 +78,26 @@ export function GaleriaObra({
                   <Icone nome="externo" />
                   Consultar obra no museu
                 </Link>
-                <Button
-                  variant="secondary"
-                  onPress={() => mudarAbertura(false)}
-                >
-                  Voltar
-                </Button>
-                {lote.status === "live" && (
-                  <Link
-                    href={`/lotes/${lote.id}`}
-                    onPress={() => {
-                      navegacao.push(`/lotes/${lote.id}`);
-                      mudarAbertura(false);
-                    }}
-                    className={buttonVariants({ variant: "primary" })}
+                <Card.Content className="ml-auto flex-none flex-row flex-wrap items-center justify-end gap-2 p-0">
+                  <Button
+                    variant="secondary"
+                    onPress={() => mudarAbertura(false)}
                   >
-                    Ir para o leilão <Icone nome="seta" />
-                  </Link>
-                )}
+                    Voltar
+                  </Button>
+                  {lote.status === "live" && (
+                    <Link
+                      href={`/lotes/${lote.id}`}
+                      onPress={() => {
+                        navegacao.push(`/lotes/${lote.id}`);
+                        mudarAbertura(false);
+                      }}
+                      className={buttonVariants({ variant: "primary" })}
+                    >
+                      Ir para o leilão <Icone nome="seta" />
+                    </Link>
+                  )}
+                </Card.Content>
               </Modal.Footer>
             </Modal.Dialog>
           </Modal.Container>

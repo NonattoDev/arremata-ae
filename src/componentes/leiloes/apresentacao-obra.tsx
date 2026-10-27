@@ -1,3 +1,4 @@
+import { formatarDataAcervo } from "@/lib/datas";
 import { Card, Link, Typography } from "@heroui/react";
 import type { Lote } from "@/tipos/leilao";
 import { GaleriaObra } from "./galeria-obra";
@@ -12,7 +13,7 @@ export function ApresentacaoObra({ lote }: { lote: Lote }) {
             <Icone nome="imagem" /> A obra
           </Typography>
           <Typography className="text-sm text-muted">
-            {lote.item.date}
+            {formatarDataAcervo(lote.item.date ?? "")}
           </Typography>
         </Card.Header>
         <Card variant="transparent" className="gap-0 p-0">

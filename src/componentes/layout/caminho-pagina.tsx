@@ -23,7 +23,7 @@ export function CaminhoPagina() {
   return (
     <Breadcrumbs
       aria-label="Caminho da página"
-      className="mb-5 w-fit max-w-full flex-wrap rounded-full border border-border/60 bg-surface/80 px-4 py-2 text-sm shadow-sm"
+      className="mb-5 w-fit max-w-full flex-wrap rounded-full border border-border/60 bg-surface/80 px-4 py-2 text-sm shadow-sm [&_.breadcrumbs__link]:inline-flex [&_.breadcrumbs__link]:items-center [&_.breadcrumbs__link]:gap-1.5 [&_.breadcrumbs__link]:no-underline! [&_.breadcrumbs__link]:transition-colors [&_.breadcrumbs__link:hover]:text-accent"
     >
       <Breadcrumbs.Item href="/" className="gap-1.5">
         <Icone nome="inicio" className="text-base" />

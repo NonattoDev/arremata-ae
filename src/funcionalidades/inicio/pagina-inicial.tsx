@@ -4,7 +4,7 @@ import { Icone } from "@/componentes/ui/icone";
 
 import { Card, Link, Typography, buttonVariants } from "@heroui/react";
 import { useRecurso } from "@/hooks/use-recurso";
-import { CartaoLote } from "@/componentes/leiloes/cartao-lote";
+import { GradeProgressiva } from "@/componentes/leiloes/grade-progressiva";
 import { Carregando } from "@/componentes/ui/carregando";
 import { Aviso } from "@/componentes/ui/aviso";
 import { EstadoVazio } from "@/componentes/ui/estado-vazio";
@@ -16,7 +16,7 @@ import type { Lote } from "@/tipos/leilao";
 export function PaginaInicial() {
   const { dados, erro } = useRecurso<Lote[]>("lots", true);
   const aoVivo = dados?.filter((lote) => lote.status === "live") ?? [];
-  const destacados = aoVivo.slice(0, 3);
+
   return (
     <Card variant="transparent" className="gap-10 p-0 sm:gap-12">
       <DestaqueInicial lotes={aoVivo.slice(0, 5)} quantidade={aoVivo.length} />
@@ -36,7 +36,8 @@ export function PaginaInicial() {
               Em leilão agora
             </Typography.Heading>
             <Card.Description>
-              Valores e prazos atualizados durante a disputa.
+              {dados ? `${aoVivo.length} leilões ao vivo. ` : ""}Valores e
+              prazos atualizados durante a disputa.
             </Card.Description>
           </Card.Content>
           <Link
@@ -50,13 +51,9 @@ export function PaginaInicial() {
           <Aviso>{erro}</Aviso>
         ) : !dados ? (
           <Carregando />
-        ) : destacados.length ? (
+        ) : aoVivo.length ? (
           <Card.Content className="relative grid min-w-0 items-start gap-6 overflow-visible">
-            <Card.Content className="grid min-w-0 gap-6 md:grid-cols-2 xl:grid-cols-3">
-              {destacados.map((lote) => (
-                <CartaoLote key={lote.id} lote={lote} />
-              ))}
-            </Card.Content>
+            <GradeProgressiva lotes={aoVivo} />
             <Card.Content className="hidden min-w-0 p-0 min-[2300px]:absolute min-[2300px]:left-full min-[2300px]:top-0 min-[2300px]:ml-6 min-[2300px]:flex min-[2300px]:w-68">
               <DestaquesDisputas lotes={dados} />
             </Card.Content>

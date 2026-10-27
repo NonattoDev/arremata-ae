@@ -54,9 +54,10 @@ export function CartaoLote({
             }
             variant="primary"
             size="sm"
-            className="pointer-events-none absolute left-4 top-4"
+            className="pointer-events-none absolute left-4 top-4 h-7 gap-1.5 px-2.5 py-1"
           >
             <Icone
+              className="text-[14px]! leading-none"
               nome={
                 lote.status === "scheduled"
                   ? "tempo"
@@ -65,7 +66,7 @@ export function CartaoLote({
                     : "confirmar"
               }
             />
-            {rotulosSituacao[lote.status]}
+            <Chip.Label className="leading-none">{rotulosSituacao[lote.status]}</Chip.Label>
           </Chip>
         )}
       </Card.Content>

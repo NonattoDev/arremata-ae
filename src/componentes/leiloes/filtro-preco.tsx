@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Label, Slider, Typography } from "@heroui/react";
-import { Campo } from "@/componentes/ui/campo";
+import { CampoMoeda } from "@/componentes/ui/campo-moeda";
 import { formatarReais } from "@/lib/formatacao";
 
 export function FiltroPreco({
@@ -45,27 +45,24 @@ export function FiltroPreco({
         </Slider.Track>
       </Slider>
       <Card.Content className="grid grid-cols-2 gap-3 p-0">
-        <Campo
+        <CampoMoeda
           name="preco-minimo"
           label="Mínimo (R$)"
-          type="number"
-          min={0}
-          step="0.01"
-          inputMode="decimal"
-          placeholder="0"
-          value={minimo}
-          onChange={(e) => aoAlterar(e.target.value, maximo)}
+          required={false}
+          valor={inicio}
+          exibirZero={minimo !== ""}
+          alterar={(valor) => aoAlterar(String(valor / 100), maximo)}
+          aoLimpar={() => aoAlterar("", maximo)}
         />
-        <Campo
+        <CampoMoeda
           name="preco-maximo"
           label="Máximo (R$)"
-          type="number"
-          min={0}
-          step="0.01"
-          inputMode="decimal"
+          required={false}
           placeholder="Sem limite"
-          value={maximo}
-          onChange={(e) => aoAlterar(minimo, e.target.value)}
+          valor={maximo === "" ? 0 : fim}
+          exibirZero={maximo !== ""}
+          alterar={(valor) => aoAlterar(minimo, String(valor / 100))}
+          aoLimpar={() => aoAlterar(minimo, "")}
         />
       </Card.Content>
       <Typography className="text-xs" role={invalido ? "alert" : undefined}>

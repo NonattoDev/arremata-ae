@@ -3,9 +3,7 @@
 import { Card, Chip, Typography, Tabs, Accordion } from "@heroui/react";
 import { useState } from "react";
 import { Icone, type NomeIcone } from "@/componentes/ui/icone";
-import type { Lote } from "@/tipos/leilao";
-import { dataLocal } from "@/lib/datas";
-import { useRecurso } from "@/hooks/use-recurso";
+import { useCatalogo } from "@/hooks/use-catalogo";
 import { Aviso } from "@/componentes/ui/aviso";
 import { Carregando } from "@/componentes/ui/carregando";
 import { EstadoVazio } from "@/componentes/ui/estado-vazio";
@@ -31,56 +29,27 @@ const coresCategorias: Record<string, { texto: string; destaque: string }> = {
     destaque: "bg-violet-100 dark:bg-violet-950",
   },
 };
-const normalizarBusca = (texto: string) =>
-  texto
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
-
 export function CatalogoLeiloes() {
-  const { dados: lotes, erro } = useRecurso<Lote[]>("lots", true);
   const [minimo, definirMinimo] = useState("");
   const [maximo, definirMaximo] = useState("");
-  const preco = (lote: Lote) => lote.currentAmount || lote.initial;
-  const teto = Math.max(100, ...(lotes ?? []).map(preco));
   const [aba, definirAba] = useState("live");
   const [busca, definirBusca] = useState("");
   const [artista, definirArtista] = useState("");
   const [data, definirData] = useState("");
-  const artistas = [
-    ...new Set((lotes ?? []).map((lote) => lote.item.artist).filter(Boolean)),
-  ].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  const datas = [
-    ...new Set((lotes ?? []).map((lote) => lote.item.date).filter(Boolean)),
-  ].sort((a, b) => a.localeCompare(b, "pt-BR", { numeric: true }));
   const [ordem, definirOrdem] = useState<OrdenacaoCatalogo>("prazo");
-  const encontrados = (lotes ?? []).filter(
-    (lote) =>
-      (minimo === "" || preco(lote) >= Math.round(Number(minimo) * 100)) &&
-      (maximo === "" || preco(lote) <= Math.round(Number(maximo) * 100)) &&
-      (!artista || lote.item.artist === artista) &&
-      (!data || lote.item.date === data) &&
-      normalizarBusca(`${lote.item.title} ${lote.item.artist}`).includes(
-        normalizarBusca(busca),
-      ),
-  );
-  const visiveis = encontrados
-    .filter((lote) => lote.status === aba)
-    .sort((primeiro, segundo) => {
-      if (ordem === "menor") return preco(primeiro) - preco(segundo);
-      if (ordem === "maior") return preco(segundo) - preco(primeiro);
-      if (ordem === "disputados") return segundo.bidCount - primeiro.bidCount;
-      if (aba === "scheduled")
-        return (
-          dataLocal(primeiro.startsAt).valueOf() -
-          dataLocal(segundo.startsAt).valueOf()
-        );
-      const diferenca =
-        dataLocal(primeiro.endsAt).valueOf() -
-        dataLocal(segundo.endsAt).valueOf();
-      return aba === "closed" ? -diferenca : diferenca;
-    });
+  const {
+    lotes,
+    erro,
+    total,
+    totais,
+    artistas,
+    datas,
+    teto,
+    temMais,
+    carregando,
+    carregarMais,
+  } = useCatalogo({ minimo, maximo, status: aba, busca, artista, data, ordem });
+  const visiveis = lotes ?? [];
   const filtros = (
     <FiltrosCatalogo
       minimo={minimo}
@@ -175,8 +144,7 @@ export function CatalogoLeiloes() {
                   <Chip.Label
                     className={`whitespace-nowrap ${coresCategorias[chave].texto}`}
                   >
-                    {rotulo} ·{" "}
-                    {encontrados.filter((lote) => lote.status === chave).length}
+                    {rotulo} · {totais[chave] ?? 0}
                   </Chip.Label>
                 </Tabs.Tab>
               ))}
@@ -185,7 +153,7 @@ export function CatalogoLeiloes() {
           <Typography className="mb-5 text-xs text-muted" aria-live="polite">
             {!lotes
               ? "Carregando catálogo…"
-              : `${visiveis.length} ${visiveis.length === 1 ? "obra encontrada" : "obras encontradas"}${busca.trim() ? ` para “${busca.trim()}”` : ""}`}
+              : `${total} ${total === 1 ? "obra encontrada" : "obras encontradas"}${busca.trim() ? ` para “${busca.trim()}”` : ""}`}
           </Typography>
           {categorias.map(({ chave }) => (
             <Tabs.Panel key={chave} id={chave} className="min-w-0">
@@ -205,6 +173,10 @@ export function CatalogoLeiloes() {
                     maximo,
                   ])}
                   lotes={visiveis}
+                  total={total}
+                  temMais={temMais}
+                  carregando={carregando}
+                  carregarMais={carregarMais}
                 />
               ) : (
                 <EstadoVazio

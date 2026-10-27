@@ -2,10 +2,10 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { exigirUsuario, type ContextoComando } from "./contexto";
 import { ErroDominio } from "../leilao";
-import type { LinhaBanco } from "../banco";
+import type { DepositoBanco } from "../banco/linhas";
 import type { DepositoSimulado } from "@/tipos/deposito";
 
-function apresentar(linha: LinhaBanco, agora: number): DepositoSimulado {
+function apresentar(linha: DepositoBanco, agora: number): DepositoSimulado {
   return {
     id: linha.id,
     valor: Number(linha.amount),
@@ -36,7 +36,7 @@ export async function iniciarDeposito(
       "UPDATE deposit_simulations SET status='expired' WHERE user_id=$1 AND status='pending' AND expires_at <= $2",
       [usuario.id, new Date(agora)],
     );
-    const [pendente] = await banco.busca(
+    const [pendente] = await banco.busca<DepositoBanco>(
       "SELECT * FROM deposit_simulations WHERE user_id=$1 AND status='pending'",
       [usuario.id],
     );
@@ -48,7 +48,7 @@ export async function iniciarDeposito(
         throw new ErroDominio("Conclua ou cancele o depósito em andamento.");
       return apresentar(pendente, agora);
     }
-    const [criado] = await banco.busca(
+    const [criado] = await banco.busca<DepositoBanco>(
       "INSERT INTO deposit_simulations (id,user_id,amount,method,created_at,ready_at,expires_at) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *",
       [
         randomUUID(),
@@ -74,7 +74,7 @@ export async function processarDeposito(
   const id = z.uuid().parse(identificador);
   const usuario = modo === "qr" ? undefined : await exigirUsuario(contexto);
   return contexto.db.transacionar(async (banco) => {
-    const [deposito] = await banco.busca(
+    const [deposito] = await banco.busca<DepositoBanco>(
       "SELECT * FROM deposit_simulations WHERE id=$1 FOR UPDATE",
       [id],
     );

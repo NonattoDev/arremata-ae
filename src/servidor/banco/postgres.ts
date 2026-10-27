@@ -1,12 +1,12 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type Prisma } from "../../generated/prisma/client";
-import type { BancoDados, Consultavel, LinhaBanco } from "./tipos";
+import type { BancoDados, Consultavel } from "./tipos";
 
 function consultas(
   cliente: PrismaClient | Prisma.TransactionClient,
 ): Consultavel {
   return {
-    async busca<T extends LinhaBanco>(sql: string, valores: unknown[] = []) {
+    async busca<T extends object>(sql: string, valores: unknown[] = []) {
       // As consultas são definidas no projeto; dados do usuário entram somente como parâmetros.
       // Escritas sem RETURNING usam executeRaw; queryRaw exige linhas de retorno.
       if (/^\s*(SELECT|WITH)\b/i.test(sql) || /\bRETURNING\b/i.test(sql))
@@ -23,6 +23,14 @@ export function criarBancoPostgres(endereco: string): BancoDados {
   });
   return {
     ...consultas(cliente),
+    lerConsistente: (operacao) =>
+      cliente.$transaction(
+        async (transacao) => {
+          await transacao.$executeRawUnsafe("SET TRANSACTION READ ONLY");
+          return operacao(consultas(transacao));
+        },
+        { isolationLevel: "RepeatableRead", maxWait: 10_000, timeout: 30_000 },
+      ),
     transacionar: (operacao) =>
       cliente.$transaction(
         async (transacao) => {

@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Arquitetura exigida pelo proprietário
 
-- Manter componentes pequenos e reaproveitáveis; telas ficam em `src/features`, componentes compartilhados em `src/components`.
+- Manter componentes pequenos e reaproveitáveis; telas ficam em `src/funcionalidades`, componentes compartilhados em `src/componentes`.
 - Usar rotas próprias do App Router; não concentrar telas em um roteador manual.
 - Mutações da interface usam Server Actions. Validar entrada, sessão e autorização no servidor através dos comandos compartilhados.
 - Manter schema e migrations do banco no Prisma. SQL crítico existente é parametrizado e executado pelo adapter Prisma; nunca interpolar entrada de usuário.

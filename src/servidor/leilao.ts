@@ -1,6 +1,9 @@
+import { consultarCatalogo } from "./consultas/catalogo";
+import type { UsuarioBanco, LoteBanco } from "./banco/linhas";
+import { liquidarVencidos } from "./dominio/liquidacao";
 import { randomUUID } from "node:crypto";
 import { validarCpf } from "../lib/cpf";
-import type { BancoDados, Consultavel, LinhaBanco } from "./banco";
+import type { BancoDados, Consultavel } from "./banco";
 
 import {
   ErroDominio,
@@ -32,7 +35,7 @@ export class ServicoLeiloes {
     this.integridade = new ServicoAuditoria(segredo);
   }
   private async usuario(transacao: Consultavel, id: string, papel?: string) {
-    const [usuarioBanco] = await transacao.busca(
+    const [usuarioBanco] = await transacao.busca<UsuarioBanco>(
       "SELECT * FROM users WHERE id=$1",
       [id],
     );
@@ -47,7 +50,7 @@ export class ServicoLeiloes {
     return usuarioBanco;
   }
   private async lote(transacao: Consultavel, id: string) {
-    const [loteBanco] = await transacao.busca(
+    const [loteBanco] = await transacao.busca<LoteBanco>(
       "SELECT * FROM lots WHERE id=$1",
       [id],
     );
@@ -64,63 +67,14 @@ export class ServicoLeiloes {
       comprometido = Number(linha.committed);
     return { total, committed: comprometido, available: total - comprometido };
   }
-  private async liquidarVencidos(transacao: Consultavel) {
-    const vencidos = await transacao.busca(
-      "SELECT * FROM lots WHERE status='open' AND ends_at <= $1 ORDER BY id",
+  private async atualizarVencidos() {
+    const [resultado] = await this.banco.busca<{ existe: boolean }>(
+      "SELECT EXISTS(SELECT 1 FROM lots WHERE status='open' AND ends_at <= $1) AS existe",
       [new Date(this.agora())],
     );
-    const bloqueados: string[] = [];
-    for (const loteBanco of vencidos) {
-      if (!(await this.integridade.auditarDados(transacao, loteBanco)).intact) {
-        bloqueados.push(loteBanco.id);
-        continue;
-      }
-      let comprovante = null;
-      if (loteBanco.leader_id) {
-        const vencedor = await this.usuario(transacao, loteBanco.leader_id);
-        const valor = Number(loteBanco.current_amount);
-        await transacao.busca(
-          "UPDATE users SET balance=balance-$2 WHERE id=$1",
-          [loteBanco.leader_id, valor],
-        );
-        await transacao.busca(
-          "UPDATE users SET balance=balance+$2 WHERE id=$1",
-          [loteBanco.seller_id, valor],
-        );
-        for (const [id, valorMovimentacao, tipo] of [
-          [loteBanco.leader_id, -valor, "purchase"],
-          [loteBanco.seller_id, valor, "sale"],
-        ]) {
-          await transacao.busca(
-            "INSERT INTO ledger (id,user_id,lot_id,amount,kind,created_at) VALUES ($1,$2,$3,$4,$5,$6)",
-            [
-              randomUUID(),
-              id,
-              loteBanco.id,
-              valorMovimentacao,
-              tipo,
-              new Date(this.agora()),
-            ],
-          );
-        }
-        comprovante = {
-          lotId: loteBanco.id,
-          winner: vencedor.alias,
-          amount: valor,
-          settledAt: new Date(this.agora()).toISOString(),
-          bidHash: loteBanco.head_hash,
-        };
-      }
-      await transacao.busca(
-        "UPDATE lots SET status='closed', receipt=$2 WHERE id=$1",
-        [loteBanco.id, JSON.stringify(comprovante)],
-      );
-      await this.integridade.salvarPontoVerificacao(transacao, loteBanco.id);
-    }
-    return {
-      processed: vencidos.length - bloqueados.length,
-      blocked: bloqueados,
-    };
+    // Só entra na fila financeira quando existe trabalho de liquidação.
+    // A transação verifica novamente os lotes, mantendo a operação idempotente.
+    if (resultado.existe) await this.liquidar();
   }
   async criarUsuario(
     email: string,
@@ -146,7 +100,7 @@ export class ServicoLeiloes {
     validarDinheiro(valor);
     return this.banco.transacionar(async (transacao) => {
       await this.usuario(transacao, id, "bidder");
-      await this.liquidarVencidos(transacao);
+      await liquidarVencidos(transacao, this.integridade, this.agora);
       const saldo = await this.saldos(transacao, id);
       if (saldo.total + valor > 1000000000000)
         throw new ErroDominio("Limite de saldo simulado atingido.");
@@ -162,8 +116,8 @@ export class ServicoLeiloes {
     });
   }
   async carteira(id: string) {
-    return this.banco.transacionar(async (transacao) => {
-      await this.liquidarVencidos(transacao);
+    await this.atualizarVencidos();
+    return this.banco.lerConsistente(async (transacao) => {
       return this.saldos(transacao, id);
     });
   }
@@ -207,10 +161,17 @@ export class ServicoLeiloes {
     validarDinheiro(valor);
     return this.banco.transacionar(async (transacao) => {
       const usuarioBanco = await this.usuario(transacao, idUsuario, "bidder");
-      if (!usuarioBanco.cpf || !validarCpf(usuarioBanco.cpf) || !usuarioBanco.nascimento ||
-        new Date(usuarioBanco.nascimento).getTime() >= this.agora())
-        throw new ErroDominio("Complete seu CPF e sua data de nascimento antes de dar lance.", 403);
-      await this.liquidarVencidos(transacao);
+      if (
+        !usuarioBanco.cpf ||
+        !validarCpf(usuarioBanco.cpf) ||
+        !usuarioBanco.nascimento ||
+        new Date(usuarioBanco.nascimento).getTime() >= this.agora()
+      )
+        throw new ErroDominio(
+          "Complete seu CPF e sua data de nascimento antes de dar lance.",
+          403,
+        );
+      await liquidarVencidos(transacao, this.integridade, this.agora);
       const loteBanco = await this.lote(transacao, idLote);
       const agora = this.agora();
       await this.integridade.exigirIntegridade(transacao, loteBanco);
@@ -272,7 +233,7 @@ export class ServicoLeiloes {
   async cancelar(idUsuario: string, idLote: string) {
     return this.banco.transacionar(async (transacao) => {
       await this.usuario(transacao, idUsuario, "seller");
-      await this.liquidarVencidos(transacao);
+      await liquidarVencidos(transacao, this.integridade, this.agora);
       const loteBanco = await this.lote(transacao, idLote);
       await this.integridade.exigirIntegridade(transacao, loteBanco);
       if (loteBanco.seller_id !== idUsuario)
@@ -290,10 +251,10 @@ export class ServicoLeiloes {
   }
   async liquidar() {
     return this.banco.transacionar((transacao) =>
-      this.liquidarVencidos(transacao),
+      liquidarVencidos(transacao, this.integridade, this.agora),
     );
   }
-  private lotePublico(loteBanco: LinhaBanco, idUsuario?: string) {
+  private lotePublico(loteBanco: LoteBanco, idUsuario?: string) {
     const situacao =
       loteBanco.status !== "open"
         ? loteBanco.status
@@ -315,36 +276,54 @@ export class ServicoLeiloes {
       startsAt: paraIso(loteBanco.starts_at),
       endsAt: paraIso(loteBanco.ends_at),
       status: situacao as string,
-      isLeader: situacao !== "cancelled" && !!idUsuario && loteBanco.leader_id === idUsuario,
+      isLeader:
+        situacao !== "cancelled" &&
+        !!idUsuario &&
+        loteBanco.leader_id === idUsuario,
       isOwner: !!idUsuario && loteBanco.seller_id === idUsuario,
       hasWinner: !!loteBanco.receipt,
     };
   }
+  async catalogo(entrada: unknown, idUsuario?: string) {
+    await this.atualizarVencidos();
+    return this.banco.lerConsistente(async (transacao) => {
+      const resultado = await consultarCatalogo(
+        transacao,
+        entrada,
+        this.agora(),
+      );
+      return {
+        ...resultado,
+        lotes: resultado.lotes.map((lote) => this.lotePublico(lote, idUsuario)),
+      };
+    });
+  }
   async listarLotes(idUsuario?: string, modo = "all") {
     // A imagem tem sua própria rota; não precisamos transportar o base64 na listagem.
-    const campos = "id, seller_id, item - 'image' AS item, initial, increment, current_amount, bid_count, starts_at, ends_at, status, leader_id, receipt";
-    return this.banco.transacionar(async (transacao) => {
-      await this.liquidarVencidos(transacao);
+    const campos =
+      "id, seller_id, item - 'image' AS item, initial, increment, current_amount, bid_count, starts_at, ends_at, status, leader_id, receipt";
+    await this.atualizarVencidos();
+    return this.banco.lerConsistente(async (transacao) => {
       const lotes =
         modo === "seller"
-          ? await transacao.busca(
+          ? await transacao.busca<LoteBanco>(
               `SELECT ${campos} FROM lots WHERE seller_id=$1 ORDER BY created_at DESC`,
               [idUsuario],
             )
           : modo === "mine"
-            ? await transacao.busca(
+            ? await transacao.busca<LoteBanco>(
                 `SELECT ${campos} FROM lots WHERE id IN (SELECT lot_id FROM bids WHERE bidder_id=$1) ORDER BY created_at DESC`,
                 [idUsuario],
               )
-            : await transacao.busca(
+            : await transacao.busca<LoteBanco>(
                 `SELECT ${campos} FROM lots WHERE status != 'cancelled' ORDER BY created_at DESC`,
               );
       return lotes.map((loteBanco) => this.lotePublico(loteBanco, idUsuario));
     });
   }
   async obterLote(id: string, idUsuario?: string) {
-    return this.banco.transacionar(async (transacao) => {
-      await this.liquidarVencidos(transacao);
+    await this.atualizarVencidos();
+    return this.banco.lerConsistente(async (transacao) => {
       const loteBanco = await this.lote(transacao, id);
       const auditar = await this.integridade.auditarDados(transacao, loteBanco);
       const posicoes = await transacao.busca(
@@ -364,7 +343,7 @@ export class ServicoLeiloes {
     });
   }
   async auditar(id: string, paginaSolicitada?: number) {
-    return this.banco.transacionar(async (transacao) => {
+    return this.banco.lerConsistente(async (transacao) => {
       const loteBanco = await this.lote(transacao, id);
       const auditoria = await this.integridade.auditarDados(
         transacao,
@@ -392,8 +371,8 @@ export class ServicoLeiloes {
     });
   }
   async comprovante(id: string) {
-    return this.banco.transacionar(async (transacao) => {
-      await this.liquidarVencidos(transacao);
+    await this.atualizarVencidos();
+    return this.banco.lerConsistente(async (transacao) => {
       const loteBanco = await this.lote(transacao, id);
       await this.integridade.exigirIntegridade(transacao, loteBanco);
       if (!loteBanco.receipt)

@@ -10,22 +10,22 @@ datasource db {
 /// O papel é limitado a seller/bidder pela restrição CHECK da migration.
 model Usuario {
   preferenciasNovidades PreferenciaNovidades[]
-  id             String         @id
-  email          String         @unique
-  nome           String         @map("name")
-  avatar         String?
-  cpf            String?
-  nascimento     DateTime?      @db.Date
-  hashSenha      String         @map("password_hash")
-  papel          String         @map("role")
-  apelido        String         @unique @map("alias")
-  saldo          BigInt         @default(0) @map("balance")
-  depositosSimulados DepositoSimulado[]
-  sessoes        Sessao[]
-  lotesOfertados Lote[]         @relation("Seller")
-  lotesLiderados Lote[]         @relation("Leader")
-  lances         Lance[]
-  movimentacoes  Movimentacao[]
+  id                    String                 @id
+  email                 String                 @unique
+  nome                  String                 @map("name")
+  avatar                String?
+  cpf                   String?
+  nascimento            DateTime?              @db.Date
+  hashSenha             String                 @map("password_hash")
+  papel                 String                 @map("role")
+  apelido               String                 @unique @map("alias")
+  saldo                 BigInt                 @default(0) @map("balance")
+  depositosSimulados    DepositoSimulado[]
+  sessoes               Sessao[]
+  lotesOfertados        Lote[]                 @relation("Seller")
+  lotesLiderados        Lote[]                 @relation("Leader")
+  lances                Lance[]
+  movimentacoes         Movimentacao[]
 
   @@map("users")
 }
@@ -36,6 +36,8 @@ model Sessao {
   expiraEm  DateTime @map("expires_at") @db.Timestamptz
   usuario   Usuario  @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([idUsuario], map: "sessions_user")
+  @@index([expiraEm], map: "sessions_expiry")
   @@map("sessions")
 }
 
@@ -43,27 +45,29 @@ model Sessao {
 /// Valores monetários ficam em centavos inteiros; restrições CHECK estão na migration.
 model Lote {
   preferenciasNovidades PreferenciaNovidades[]
-  id               String         @id
-  idLeiloeiro      String         @map("seller_id")
-  item             Json           @db.JsonB
-  valorInicial     BigInt         @map("initial")
-  incremento       BigInt         @map("increment")
-  inicioEm         DateTime       @map("starts_at") @db.Timestamptz
-  fimEm            DateTime       @map("ends_at") @db.Timestamptz
-  situacao         String         @default("open") @map("status")
-  valorAtual       BigInt         @default(0) @map("current_amount")
-  idLider          String?        @map("leader_id")
-  quantidadeLances Int            @default(0) @map("bid_count")
-  hashFinal        String         @map("head_hash")
-  pontoVerificacao String         @map("checkpoint")
-  comprovante      Json?          @map("receipt") @db.JsonB
-  criadoEm         DateTime       @default(now()) @map("created_at") @db.Timestamptz
-  leiloeiro        Usuario        @relation("Seller", fields: [idLeiloeiro], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lider            Usuario?       @relation("Leader", fields: [idLider], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lances           Lance[]
-  movimentacoes    Movimentacao[]
+  id                    String                 @id
+  idLeiloeiro           String                 @map("seller_id")
+  item                  Json                   @db.JsonB
+  valorInicial          BigInt                 @map("initial")
+  incremento            BigInt                 @map("increment")
+  inicioEm              DateTime               @map("starts_at") @db.Timestamptz
+  fimEm                 DateTime               @map("ends_at") @db.Timestamptz
+  situacao              String                 @default("open") @map("status")
+  valorAtual            BigInt                 @default(0) @map("current_amount")
+  idLider               String?                @map("leader_id")
+  quantidadeLances      Int                    @default(0) @map("bid_count")
+  hashFinal             String                 @map("head_hash")
+  pontoVerificacao      String                 @map("checkpoint")
+  comprovante           Json?                  @map("receipt") @db.JsonB
+  criadoEm              DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  leiloeiro             Usuario                @relation("Seller", fields: [idLeiloeiro], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lider                 Usuario?               @relation("Leader", fields: [idLider], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lances                Lance[]
+  movimentacoes         Movimentacao[]
 
   @@index([situacao, fimEm], map: "lots_due")
+  @@index([idLider, situacao], map: "lots_leader_status")
+  @@index([idLeiloeiro, criadoEm], map: "lots_seller_created")
   @@map("lots")
 }
 
@@ -81,7 +85,6 @@ model Lance {
   licitante    Usuario  @relation(fields: [idLicitante], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([idLote, sequencia], map: "bids_lot_id_sequence_key")
-  @@index([idLote, sequencia], map: "bids_lot")
   @@index([idLicitante, idLote], map: "bids_user")
   @@map("bids")
 }
@@ -109,31 +112,34 @@ model LimiteTentativas {
 }
 
 model DepositoSimulado {
- id String @id
- idUsuario String @map("user_id")
- valor BigInt @map("amount")
- metodo String @map("method")
- estado String @default("pending") @map("status")
- criadoEm DateTime @map("created_at") @db.Timestamptz
- disponivelEm DateTime @map("ready_at") @db.Timestamptz
- expiraEm DateTime @map("expires_at") @db.Timestamptz
- confirmadoEm DateTime? @map("confirmed_at") @db.Timestamptz
- usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
- @@index([idUsuario, criadoEm], map: "deposit_simulations_user")
- @@map("deposit_simulations")
+  id           String    @id
+  idUsuario    String    @map("user_id")
+  valor        BigInt    @map("amount")
+  metodo       String    @map("method")
+  estado       String    @default("pending") @map("status")
+  criadoEm     DateTime  @map("created_at") @db.Timestamptz
+  disponivelEm DateTime  @map("ready_at") @db.Timestamptz
+  expiraEm     DateTime  @map("expires_at") @db.Timestamptz
+  confirmadoEm DateTime? @map("confirmed_at") @db.Timestamptz
+  usuario      Usuario   @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([idUsuario, criadoEm], map: "deposit_simulations_user")
+  @@map("deposit_simulations")
 }
 
 model PreferenciaNovidades {
-  numeroWhatsapp String @default("") @map("whatsapp_number")
-  usuarioTelegram String @default("") @map("telegram_username")
-  idUsuario String @map("user_id")
-  idLote String @map("lot_id")
-  whatsapp Boolean @default(false)
-  telegram Boolean @default(false)
-  email Boolean @default(false)
-  atualizadoEm DateTime @default(now()) @map("updated_at") @db.Timestamptz
-  usuario Usuario @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  lote Lote @relation(fields: [idLote], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  numeroWhatsapp  String   @default("") @map("whatsapp_number")
+  usuarioTelegram String   @default("") @map("telegram_username")
+  idUsuario       String   @map("user_id")
+  idLote          String   @map("lot_id")
+  whatsapp        Boolean  @default(false)
+  telegram        Boolean  @default(false)
+  email           Boolean  @default(false)
+  atualizadoEm    DateTime @default(now()) @map("updated_at") @db.Timestamptz
+  usuario         Usuario  @relation(fields: [idUsuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lote            Lote     @relation(fields: [idLote], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
   @@id([idUsuario, idLote])
+  @@index([idLote], map: "auction_news_preferences_lot")
   @@map("auction_news_preferences")
 }

@@ -34,7 +34,7 @@ export async function limitarTentativas(
   chave: string,
   maximo: number,
 ) {
-  const [linha] = await banco.busca(
+  const [linha] = await banco.busca<{ hits: number }>(
     `INSERT INTO rate_limits (key,hits,resets_at) VALUES ($1,1,now()+interval '1 minute')
     ON CONFLICT(key) DO UPDATE SET hits=CASE WHEN rate_limits.resets_at < now() THEN 1 ELSE rate_limits.hits+1 END,
     resets_at=CASE WHEN rate_limits.resets_at < now() THEN now()+interval '1 minute' ELSE rate_limits.resets_at END RETURNING hits`,

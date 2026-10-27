@@ -36,7 +36,7 @@ Consultas e polling usam GET, adequado à atualização a cada dois segundos. Im
 
 ## Prisma e transações
 
-Seis modelos: Usuario, Sessao, Lote, Lance, Movimentacao e LimiteTentativas. Relações e nomes de colunas são mapeados para preservar o banco existente. Dinheiro é BigInt em centavos; datas usam timestamptz; snapshots/comprovantes usam JSONB. CHECKs de saldo, papel, estado, valores e datas ficam no SQL da migration, pois não são representados diretamente pelo Prisma Schema.
+Oito modelos: Usuario, Sessao, Lote, Lance, Movimentacao, LimiteTentativas, DepositoSimulado e PreferenciaNovidades. A revisão completa está em REVISAO-SCHEMA.md. Relações e nomes de colunas são mapeados para preservar o banco existente. Dinheiro é BigInt em centavos; datas usam timestamptz; snapshots/comprovantes usam JSONB. CHECKs de saldo, papel, estado, valores e datas ficam no SQL da migration, pois não são representados diretamente pelo Prisma Schema.
 
 O runtime PostgreSQL usa PrismaClient com PrismaPg e transações interativas. As operações de mercado mantêm SQL parametrizado no serviço, executado pelo adapter Prisma. Esta etapa não converteu todas as consultas para `prisma.model.*`: preserva explicitamente o SQL das reservas, agregações e auditoria já testadas. Nunca interpolar entrada do usuário em SQL. Não considerar o uso de raw SQL equivalente à tipagem gerada dos modelos.
 
@@ -44,7 +44,7 @@ O runtime PostgreSQL usa PrismaClient com PrismaPg e transações interativas. A
 
 ## Desenvolvimento e migração
 
-`npm ci` gera cliente ignorado pelo Git. `db:validate` valida schema; `db:migrate` aplica migrations; `db:migrate:dev` cria novas migrations em banco de desenvolvimento. Seed remoto exige migration aplicada e não altera DDL. PGlite local/testes lê o SQL da mesma migration inicial; migrations futuras precisam entrar no bootstrap local também.
+`npm ci` gera cliente ignorado pelo Git. `db:validate` valida schema; `db:migrate` aplica migrations; `db:migrate:dev` cria novas migrations em banco de desenvolvimento. Seed remoto exige migration aplicada e não altera DDL. PGlite local/testes executa a lista ordenada das migrations em servidor/esquema.ts; novas migrations devem entrar nesse bootstrap também.
 
 A migration inicial é idempotente para incorporar a base desta primeira versão. Não usar `db push` ou reset para publicar. Preservar AUDIT_SECRET e dados ao migrar; trocar segredo invalida lotes existentes.
 
@@ -83,3 +83,13 @@ Por solicitação do proprietário, a interface usa DM Sans para textos e títul
 ## Perfil
 
 Configurações separam dados, imagem e senha. Nome e CPF opcional são gravados juntos em um UPDATE condicionado; CPF já preenchido só pode ser corrigido pelo suporte. O servidor valida os dígitos verificadores e usa a identidade da sessão. As migrations de avatar e CPF acrescentam colunas opcionais. Foto é recortada no cliente, validada e normalizada no servidor; somente o JPEG final é persistido. CPF, foto, nome e e-mail não integram os retornos públicos de auditoria/comprovantes.
+
+## Revisão de organização (27/10/2026)
+
+Leituras PostgreSQL usam snapshot RepeatableRead somente leitura, sem advisory lock. Antes de consultar carteira/lotes/comprovantes, uma consulta EXISTS detecta vencidos; apenas quando existem entra na liquidação transacional, que verifica novamente as condições. Escritas financeiras continuam serializadas para preservar reservas entre lotes. PGlite mantém uma fila local para suas transações.
+
+O catálogo usa servidor/consultas/catalogo.ts: busca, artista, data, preço, status e ordenação parametrizados, com páginas de 12 registros sem imagem base64. useCatalogo usa SWRInfinite e polling de cinco segundos; GradeProgressiva solicita páginas por interseção. Facetas e totais são agregados no banco. Ordenação inclui ID para desempate. OFFSET pode deslocar registros quando o catálogo muda durante a navegação; revalidação e deduplicação reduzem esse efeito, mas não constituem snapshot entre requisições.
+
+Liquidacao foi extraída para servidor/dominio/liquidacao.ts; o hook useDeposito concentra acompanhamento, persistência local e notificações, separado do formulário. Linhas SQL possuem contratos explícitos; isso não valida resultados em runtime como um ORM. Respostas da API externa passam por Zod. Erros HTTP não JSON recebem mensagem pública.
+
+A auditoria continua verificando a cadeia completa antes de paginar sua apresentação: custo linear no número de lances. Não foi substituída por uma verificação parcial para ganhar desempenho. Home, miniplayer e área pessoal ainda usam seus endpoints próprios; a paginação nova é do catálogo.

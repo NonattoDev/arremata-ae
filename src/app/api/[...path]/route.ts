@@ -82,10 +82,18 @@ async function tratarRequisicao(
       return resposta;
     }
     if (requisicao.method === "GET") {
+      if (caminho[0] === "auction-catalog" && caminho.length === 1)
+        return responderJson(
+          await servico.catalogo(
+            Object.fromEntries(requisicao.nextUrl.searchParams),
+            usuario?.id,
+          ),
+        );
       if (caminho[0] === "lots" && caminho[2] === "image") {
-        const [lote] = await banco.busca("SELECT item FROM lots WHERE id=$1", [
-          z.uuid().parse(caminho[1]),
-        ]);
+        const [lote] = await banco.busca<{ item: { image: string } }>(
+          "SELECT item FROM lots WHERE id=$1",
+          [z.uuid().parse(caminho[1])],
+        );
         if (!lote) throw new ErroDominio("Imagem não encontrada.", 404);
         const bytes = Buffer.from(lote.item.image.split(",")[1], "base64");
         return new Response(bytes, {

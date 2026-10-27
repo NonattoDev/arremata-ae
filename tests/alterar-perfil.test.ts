@@ -95,7 +95,7 @@ test("perfil protege dados fixos e troca senha encerrando apenas outras sessões
       password: nova,
       confirmacaoSenha: nova,
     });
-    const [alterada] = await banco.busca(
+    const [alterada] = await banco.busca<{ password_hash: string }>(
       "SELECT password_hash FROM users WHERE id=$1",
       [id],
     );

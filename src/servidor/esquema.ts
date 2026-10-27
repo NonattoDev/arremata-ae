@@ -38,4 +38,8 @@ export const esquema =
       "prisma/migrations/20261026000000_nascimento_usuario/migration.sql",
     ),
     "utf8",
+  ) +
+  readFileSync(
+    resolve("prisma/migrations/20261027000000_indices_consultas/migration.sql"),
+    "utf8",
   );

@@ -1,6 +1,6 @@
 import { mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
-import type { BancoDados, Consultavel, LinhaBanco } from "./tipos";
+import type { BancoDados, Consultavel } from "./tipos";
 export async function criarBancoLocal(caminho?: string): Promise<BancoDados> {
   if (caminho) await mkdir(dirname(caminho), { recursive: true });
   const { PGlite } = await import("@electric-sql/pglite");
@@ -14,7 +14,7 @@ export async function criarBancoLocal(caminho?: string): Promise<BancoDados> {
   const adaptarConsultas = (
     cliente: Pick<typeof motor, "query" | "exec">,
   ): Consultavel => ({
-    async busca<T extends LinhaBanco>(sql: string, valores?: unknown[]) {
+    async busca<T extends object>(sql: string, valores?: unknown[]) {
       if (!valores && sql.includes(";")) {
         await cliente.exec(sql);
         return [] as T[];
@@ -23,6 +23,10 @@ export async function criarBancoLocal(caminho?: string): Promise<BancoDados> {
     },
   });
   return {
+    lerConsistente: (operacao) =>
+      executarExclusivo(() =>
+        motor.transaction((transacao) => operacao(adaptarConsultas(transacao))),
+      ),
     busca: (sql, valores) =>
       executarExclusivo(() => adaptarConsultas(motor).busca(sql, valores)),
     transacionar: (operacao) =>

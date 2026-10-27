@@ -19,7 +19,7 @@ export async function alterarSenha(
   const usuario = await exigirUsuario(contexto);
   await limitarTentativas(contexto.db, `senha:${usuario.id}`, 5);
   const dados = esquemaTroca.parse(entrada);
-  const [conta] = await contexto.db.busca(
+  const [conta] = await contexto.db.busca<{ password_hash: string }>(
     "SELECT password_hash FROM users WHERE id=$1",
     [usuario.id],
   );

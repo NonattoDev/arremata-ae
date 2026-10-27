@@ -19,7 +19,7 @@ async function principal() {
       ["ana@arremata.test", "Ana", "bidder"],
       ["bruno@arremata.test", "Bruno", "bidder"],
     ] as const) {
-      const [existente] = await banco.busca(
+      const [existente] = await banco.busca<{ id: string }>(
         "SELECT id FROM users WHERE email=$1",
         [email],
       );

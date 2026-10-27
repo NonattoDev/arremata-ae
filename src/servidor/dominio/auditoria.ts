@@ -1,5 +1,6 @@
+import type { LoteBanco, LanceBanco } from "../banco/linhas";
 import { createHmac } from "node:crypto";
-import type { Consultavel, LinhaBanco } from "../banco";
+import type { Consultavel } from "../banco";
 import { ErroDominio } from "./tipos";
 const paraIso = (valor: string | Date) => new Date(valor).toISOString();
 export class ServicoAuditoria {
@@ -12,7 +13,7 @@ export class ServicoAuditoria {
       .update(JSON.stringify(dados))
       .digest("hex");
   }
-  pontoVerificacao(loteBanco: LinhaBanco) {
+  pontoVerificacao(loteBanco: LoteBanco) {
     return this.assinar([
       "checkpoint-v1",
       loteBanco.id,
@@ -30,7 +31,7 @@ export class ServicoAuditoria {
       loteBanco.receipt,
     ]);
   }
-  hashLance(lanceBanco: LinhaBanco) {
+  hashLance(lanceBanco: Omit<LanceBanco, "hash">) {
     return this.assinar([
       "bid-v1",
       lanceBanco.id,
@@ -44,7 +45,7 @@ export class ServicoAuditoria {
     ]);
   }
   async salvarPontoVerificacao(transacao: Consultavel, id: string) {
-    const [loteBanco] = await transacao.busca(
+    const [loteBanco] = await transacao.busca<LoteBanco>(
       "SELECT * FROM lots WHERE id=$1",
       [id],
     );
@@ -54,8 +55,8 @@ export class ServicoAuditoria {
       this.pontoVerificacao(loteBanco),
     ]);
   }
-  async auditarDados(transacao: Consultavel, loteBanco: LinhaBanco) {
-    const lances = await transacao.busca(
+  async auditarDados(transacao: Consultavel, loteBanco: LoteBanco) {
+    const lances = await transacao.busca<LanceBanco>(
       "SELECT * FROM bids WHERE lot_id=$1 ORDER BY sequence",
       [loteBanco.id],
     );
@@ -85,7 +86,7 @@ export class ServicoAuditoria {
       checkpoint: loteBanco.checkpoint,
     };
   }
-  async exigirIntegridade(transacao: Consultavel, loteBanco: LinhaBanco) {
+  async exigirIntegridade(transacao: Consultavel, loteBanco: LoteBanco) {
     if (!(await this.auditarDados(transacao, loteBanco)).intact)
       throw new ErroDominio(
         "Histórico adulterado. Operações deste lote foram bloqueadas.",

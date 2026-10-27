@@ -29,7 +29,7 @@ export async function autenticar(
       dados.role,
     );
   } else {
-    const [conta] = await banco.busca(
+    const [conta] = await banco.busca<{ id: string; password_hash: string }>(
       "SELECT id,password_hash FROM users WHERE email=$1",
       [validado.email],
     );

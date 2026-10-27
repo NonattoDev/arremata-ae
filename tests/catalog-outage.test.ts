@@ -42,7 +42,10 @@ test("lotes persistidos, salas, auditoria e comprovantes resistem à queda da AP
       startsAt: new Date(relogio - 1000).toISOString(),
       endsAt: new Date(relogio + 180000).toISOString(),
     });
-    await banco.busca("UPDATE users SET cpf='52998224725', nascimento='1990-01-01' WHERE id=$1", [licitante]);
+    await banco.busca(
+      "UPDATE users SET cpf='52998224725', nascimento='1990-01-01' WHERE id=$1",
+      [licitante],
+    );
     await servico.depositar(licitante, 20000);
     const simulacaoFetch = t.mock.method(globalThis, "fetch", async () => {
       throw new Error("Indisponibilidade simulada do museu");
@@ -57,7 +60,7 @@ test("lotes persistidos, salas, auditoria e comprovantes resistem à queda da AP
     relogio += 180000;
     await servico.liquidar();
     assert.equal((await servico.comprovante(id)).amount, 10000);
-    const [armazenado] = await banco.busca(
+    const [armazenado] = await banco.busca<{ item: { image: string } }>(
       "SELECT item FROM lots WHERE id=$1",
       [id],
     );

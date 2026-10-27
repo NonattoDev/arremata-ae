@@ -1,4 +1,26 @@
+import { z } from "zod";
 import { ErroDominio, type ItemCatalogo } from "./leilao";
+const obraMuseu = z.object({
+  id: z.union([z.number(), z.string()]),
+  title: z.string(),
+  creators: z.array(z.object({ description: z.string().nullish() })).nullish(),
+  creation_date: z.string().nullish(),
+  images: z.object({ web: z.object({ url: z.string() }).nullish() }).nullish(),
+  url: z.string(),
+  share_license_status: z.string().nullish(),
+});
+async function lerResposta<T>(
+  resposta: Response,
+  contrato: z.ZodType<T>,
+): Promise<T> {
+  const resultado = contrato.safeParse(await resposta.json().catch(() => null));
+  if (!resultado.success)
+    throw new ErroDominio(
+      "O catálogo retornou dados incompatíveis. Tente novamente.",
+      503,
+    );
+  return resultado.data;
+}
 const campos =
   "id,title,creators,creation_date,images,url,share_license_status";
 async function requisitar(endereco: string) {
@@ -26,32 +48,34 @@ export async function buscarObras(busca: string) {
     cc0: "1",
     has_image: "1",
   });
-  const dados = await (
+  const dados = await lerResposta(
     await requisitar(
       `https://openaccess-api.clevelandart.org/api/artworks/?${parametros}`,
-    )
-  ).json();
+    ),
+    z.object({ data: z.array(obraMuseu) }),
+  );
   return dados.data
     .filter(
-      (resultado: any) =>
+      (resultado) =>
         resultado.images?.web?.url && resultado.share_license_status === "CC0",
     )
-    .map((resultado: any) => ({
+    .map((resultado) => ({
       id: String(resultado.id),
       title: resultado.title,
       artist:
         resultado.creators?.[0]?.description?.split(" (")[0] ||
         "Artista desconhecido",
-      image: resultado.images.web.url,
+      image: resultado.images!.web!.url,
     }));
 }
 export async function importarObra(id: string): Promise<ItemCatalogo> {
   if (!/^\d{1,9}$/.test(id)) throw new ErroDominio("ItemCatalogo inválido.");
-  const { data: dados } = await (
+  const { data: dados } = await lerResposta(
     await requisitar(
       `https://openaccess-api.clevelandart.org/api/artworks/${id}?fields=${campos}`,
-    )
-  ).json();
+    ),
+    z.object({ data: obraMuseu }),
+  );
   if (!dados?.images?.web?.url || dados.share_license_status !== "CC0")
     throw new ErroDominio("Escolha uma obra com imagem em domínio público.");
   const enderecoImagem = new URL(dados.images.web.url);

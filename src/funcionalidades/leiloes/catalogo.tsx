@@ -17,6 +17,20 @@ const categorias: { chave: string; rotulo: string; icone: NomeIcone }[] = [
   { chave: "scheduled", rotulo: "Em breve", icone: "tempo" },
   { chave: "closed", rotulo: "Encerrados", icone: "confirmar" },
 ];
+const coresCategorias: Record<string, { texto: string; destaque: string }> = {
+  live: {
+    texto: "text-emerald-700 dark:text-emerald-300",
+    destaque: "bg-emerald-100 dark:bg-emerald-950",
+  },
+  scheduled: {
+    texto: "text-blue-700 dark:text-blue-300",
+    destaque: "bg-blue-100 dark:bg-blue-950",
+  },
+  closed: {
+    texto: "text-violet-700 dark:text-violet-300",
+    destaque: "bg-violet-100 dark:bg-violet-950",
+  },
+};
 const normalizarBusca = (texto: string) =>
   texto
     .normalize("NFD")
@@ -154,12 +168,17 @@ export function CatalogoLeiloes() {
                   id={chave}
                   className="min-h-12 min-w-0 flex-col gap-1 px-2 py-2 text-xs sm:flex-row sm:gap-2 sm:px-4 sm:text-sm"
                 >
-                  <Icone nome={icone} className="text-lg" />
-                  <Chip.Label className="whitespace-nowrap">
+                  <Icone
+                    nome={icone}
+                    className={`text-lg ${coresCategorias[chave].texto}`}
+                  />
+                  <Chip.Label
+                    className={`whitespace-nowrap ${coresCategorias[chave].texto}`}
+                  >
                     {rotulo} ·{" "}
                     {encontrados.filter((lote) => lote.status === chave).length}
                   </Chip.Label>
-                  <Tabs.Indicator />
+                  <Tabs.Indicator className={coresCategorias[chave].destaque} />
                 </Tabs.Tab>
               ))}
             </Tabs.List>

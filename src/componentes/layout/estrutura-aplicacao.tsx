@@ -72,7 +72,7 @@ export function EstruturaAplicacao({
       <Card
         variant="transparent"
         role="main"
-        className="mx-auto my-6 w-[calc(100%-1.5rem)] max-w-7xl min-w-0 p-0 pb-24 sm:my-8 sm:w-[calc(100%-3rem)]"
+        className="mx-auto my-6 w-[calc(100%-1.5rem)] max-w-[1600px] min-w-0 p-0 pb-24 sm:my-8 sm:w-[calc(100%-3rem)]"
       >
         <Card.Content className="min-w-0">
           {(usuario ||

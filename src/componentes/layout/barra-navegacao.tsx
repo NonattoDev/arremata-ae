@@ -48,7 +48,7 @@ export function BarraNavegacao({
   return (
     <Card
       aria-label="Cabeçalho do site"
-      className="sticky top-3 z-40 mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-7xl flex-row flex-wrap items-center justify-between gap-x-2 gap-y-3 sm:gap-x-5 rounded-3xl border border-border/50 bg-surface/80 px-4 py-3 shadow-lg backdrop-blur-xl sm:top-5 sm:mt-5 sm:w-[calc(100%-3rem)] sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr]"
+      className="sticky top-3 z-40 mx-auto mt-3 w-[calc(100%-1.5rem)] max-w-[1600px] flex-row flex-wrap items-center justify-between gap-x-2 gap-y-3 sm:gap-x-5 rounded-3xl border border-border/50 bg-surface/80 px-4 py-3 shadow-lg backdrop-blur-xl sm:top-5 sm:mt-5 sm:w-[calc(100%-3rem)] sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr]"
     >
       <Marca />
       <Card.Content

@@ -33,7 +33,7 @@ export function GradeProgressiva({ lotes }: { lotes: Lote[] }) {
 
   return (
     <Card.Content className="min-w-0 gap-6 p-0">
-      <Card.Content className="grid min-w-0 gap-6 p-0 md:grid-cols-2 xl:grid-cols-3">
+      <Card.Content className="grid min-w-0 gap-6 p-0 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         {lotes.slice(0, quantidade).map((lote, indice) => (
           <EntradaObra
             key={lote.id}

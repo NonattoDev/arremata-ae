@@ -21,7 +21,7 @@ export function PaginaInicial() {
     <Card variant="transparent" className="gap-10 p-0 sm:gap-12">
       <DestaqueInicial lotes={aoVivo.slice(0, 5)} quantidade={aoVivo.length} />
       {dados && !erro && (
-        <Card.Content className="p-0 min-[1920px]:hidden">
+        <Card.Content className="p-0 min-[2300px]:hidden">
           <DestaquesDisputas lotes={dados} faixa />
         </Card.Content>
       )}
@@ -57,7 +57,7 @@ export function PaginaInicial() {
                 <CartaoLote key={lote.id} lote={lote} />
               ))}
             </Card.Content>
-            <Card.Content className="hidden min-w-0 p-0 min-[1920px]:absolute min-[1920px]:left-full min-[1920px]:top-0 min-[1920px]:ml-6 min-[1920px]:flex min-[1920px]:w-68">
+            <Card.Content className="hidden min-w-0 p-0 min-[2300px]:absolute min-[2300px]:left-full min-[2300px]:top-0 min-[2300px]:ml-6 min-[2300px]:flex min-[2300px]:w-68">
               <DestaquesDisputas lotes={dados} />
             </Card.Content>
           </Card.Content>

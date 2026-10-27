@@ -4,7 +4,7 @@ import { Icone } from "@/componentes/ui/icone";
 
 import { Card, Link, Typography, buttonVariants } from "@heroui/react";
 import { useRecurso } from "@/hooks/use-recurso";
-import { GradeProgressiva } from "@/componentes/leiloes/grade-progressiva";
+import { CarrosselDisputas } from "./carrossel-disputas";
 import { Carregando } from "@/componentes/ui/carregando";
 import { Aviso } from "@/componentes/ui/aviso";
 import { EstadoVazio } from "@/componentes/ui/estado-vazio";
@@ -27,7 +27,7 @@ export function PaginaInicial() {
       )}
       <Card variant="transparent" className="gap-6 p-0">
         <Card.Header className="flex-row flex-wrap items-end justify-between gap-4">
-          <Card.Content className="flex-none gap-2">
+          <Card.Content className="min-w-0 w-full gap-2 sm:w-auto sm:flex-1">
             <Typography.Heading
               level={2}
               className="flex items-center gap-3 text-2xl sm:text-3xl"
@@ -36,8 +36,7 @@ export function PaginaInicial() {
               Em leilão agora
             </Typography.Heading>
             <Card.Description>
-              {dados ? `${aoVivo.length} leilões ao vivo. ` : ""}Valores e
-              prazos atualizados durante a disputa.
+              Os mais disputados primeiro. Explore os destaques ou veja todos no catálogo.
             </Card.Description>
           </Card.Content>
           <Link
@@ -53,7 +52,7 @@ export function PaginaInicial() {
           <Carregando />
         ) : aoVivo.length ? (
           <Card.Content className="relative grid min-w-0 items-start gap-6 overflow-visible">
-            <GradeProgressiva lotes={aoVivo} />
+            <CarrosselDisputas lotes={aoVivo} />
             <Card.Content className="hidden min-w-0 p-0 min-[2300px]:absolute min-[2300px]:left-full min-[2300px]:top-0 min-[2300px]:ml-6 min-[2300px]:flex min-[2300px]:w-68">
               <DestaquesDisputas lotes={dados} />
             </Card.Content>

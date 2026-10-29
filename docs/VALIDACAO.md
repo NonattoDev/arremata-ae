@@ -174,3 +174,13 @@ Commit 8b425bf publicado no GitHub pessoal e deploy Vercel dpl_D7byTETGeiRUuF6LX
 - Por cliques no navegador: login de Ana com a conta do README, saldo inicial de R$ 5.000, depósito Pix simulado de R$ 100, confirmação, saldo de R$ 5.100 e comprovante.
 - `down` sem `-v`, seguido de `up -d`: sessão, saldo de R$ 5.100 e comprovante preservados, sem duplicar crédito nem reinicializar o saldo.
 - O worker registrou execução sem lotes vencidos. Esta rodada comprova sua inicialização, não uma liquidação real pelo agendador. O banco original e o ambiente publicado não foram alterados por este teste.
+
+## 27/10/2026 — cadastro e login em produção
+
+- Teste por cliques e preenchimento da interface em `https://arremata-ae.vercel.app`, no navegador integrado.
+- Cadastro de Marina Oliveira, conta fictícia de avaliação com perfil licitante. Após enviar nome, e-mail, senha e confirmação, a aplicação abriu a página inicial autenticada com o nome correto.
+- Logout pelo menu da conta. Ao acessar `/carteira` sem sessão, a aplicação redirecionou para `/entrar`.
+- Novo login com o e-mail e a senha cadastrados. A página `/configuracoes` exibiu Marina Oliveira, o e-mail cadastrado e o perfil Licitante.
+- Recarregamento de `/configuracoes` preservou a sessão e os dados exibidos.
+- A conta de avaliação permaneceu em produção. Não foram realizados depósitos, lances ou alterações cadastrais adicionais nesta rodada.
+- Escopo: cadastro de licitante, logout, proteção de rota e login no navegador desktop. Esta rodada não valida cadastro de leiloeiro, recuperação de senha ou dispositivo móvel físico.

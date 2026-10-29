@@ -1,16 +1,83 @@
-# Arremata aê
+<p align="center">
+  <img src="public/brand/arremata-symbol.png" alt="Símbolo Arremata aê" width="96" />
+</p>
 
-Casa de leilões demonstrativa para o desafio **Elite Dev Verzel**. Obras vêm da API pública do Cleveland Museum of Art e usuários disputam lotes com saldo simulado. Não há dinheiro real nem venda das obras do museu.
+<h1 align="center">Arremata aê</h1>
 
-## Estado
+<p align="center">Leilões de arte · Desafio Elite Dev Verzel</p>
 
-Publicado em **https://arremata-ae.vercel.app** na Vercel (NatosTech), com PostgreSQL 17 no Neon pessoal de Robson Nonato. Repositório público pessoal: **NonattoDev/arremata-ae**. Evidências e limites de validação estão em `docs/VALIDACAO.md`; revisão do candidato e submissão do teste continuam manuais.
+<p align="center">
+  <a href="https://arremata-ae.vercel.app">Abrir aplicação</a> ·
+  <a href="#rodar-com-docker">Rodar com Docker</a> ·
+  <a href="#contas-de-demonstracao">Contas de acesso</a> ·
+  <a href="docs/CHECKLIST-DESAFIO.md">Checklist do desafio</a>
+</p>
 
-## Stack
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-16-111827?style=flat-square" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/HeroUI-3-7C3AED?style=flat-square" alt="HeroUI 3" />
+  <img src="https://img.shields.io/badge/PostgreSQL-17-4169E1?style=flat-square" alt="PostgreSQL 17" />
+  <img src="https://img.shields.io/badge/Prisma-7-0C344B?style=flat-square" alt="Prisma 7" />
+</p>
 
-Next.js 16 App Router, React 19, TypeScript, HeroUI 3 e Tailwind CSS 4. Back-end Node.js com Server Actions para mutações e Route Handlers para consultas/polling e compatibilidade HTTP. PostgreSQL via Prisma 7 e adapter `pg` em produção; PGlite (PostgreSQL WASM) para desenvolvimento/testes locais. Autenticação com scrypt, sessões opacas armazenadas por hash e cookies HttpOnly/SameSite, Secure em produção. Zod valida entradas; escritas verificam origem e tentativas são limitadas no banco.
+---
 
-## Executar com Docker Compose (aplicação + banco)
+Obras reais do acervo aberto do **Cleveland Museum of Art**, disputas entre participantes e acompanhamento de lances enquanto você navega. O projeto reúne a experiência do licitante e a gestão do leiloeiro.
+
+> **Ambiente de avaliação:** os depósitos e saldos são simulados. Não há cobrança real nem venda das obras do museu.
+
+<a id="contas-de-demonstracao"></a>
+
+## 🔑 Acesso rápido para avaliação
+
+**[Entrar na aplicação publicada](https://arremata-ae.vercel.app/entrar)**
+
+| Quero testar | E-mail | Senha |
+| :--- | :--- | :--- |
+| Publicar e gerenciar leilões | `leiloeiro@arremata.test` | `Arremata-Demo-2026!` |
+| Dar lances como Ana | `ana@arremata.test` | `Arremata-Demo-2026!` |
+| Disputar com outra conta, Bruno | `bruno@arremata.test` | `Arremata-Demo-2026!` |
+
+Também é possível **[criar uma conta](https://arremata-ae.vercel.app/cadastro)** e escolher entre dar lances ou publicar lotes.
+
+As contas acima são públicas e exclusivas da demonstração. Para disputar entre contas, use perfis de navegador separados ou uma janela anônima. O saldo pode variar conforme os testes realizados.
+
+## ✦ O que explorar
+
+| 🎨 Catálogo de arte | 🔨 Disputa por lotes | 💳 Carteira |
+| :--- | :--- | :--- |
+| Obras, artistas, filtros e detalhes do acervo. | Lances, posição e contagem regressiva. | Saldo disponível, reservas e depósitos simulados. |
+| **📌 Acompanhamento** | **🧾 Resultado** | **🛡️ Integridade** |
+| Miniplayer para acompanhar até cinco leilões. | Arremates, comprovantes e resultados do leiloeiro. | Histórico público e verificação das assinaturas dos lances. |
+
+## 🧭 Para quem vai avaliar
+
+| Quero… | Onde encontrar |
+| :--- | :--- |
+| Conhecer a aplicação publicada | [arremata-ae.vercel.app](https://arremata-ae.vercel.app) |
+| Rodar aplicação e banco do zero | [Docker Compose](#rodar-com-docker) |
+| Conferir o atendimento ao PDF | [Requisitos](docs/REQUISITOS.md) · [Checklist](docs/CHECKLIST-DESAFIO.md) |
+| Entender as decisões técnicas | [Arquitetura](docs/ARQUITETURA.md) |
+| Consultar evidências e limites dos testes | [Validação](docs/VALIDACAO.md) |
+| Entender a participação da IA | [Organização e uso de IA](#organizacao-e-ia) |
+
+## 🧩 Tecnologias
+
+| Camada | Implementação |
+| :--- | :--- |
+| Interface | Next.js 16 App Router, React 19, TypeScript, HeroUI 3 e Tailwind CSS 4 |
+| Servidor | Node.js, Server Actions para mutações e Route Handlers para consultas/polling e compatibilidade HTTP |
+| Persistência | PostgreSQL 17, Prisma 7 e adapter `pg`; PGlite para desenvolvimento e testes locais |
+| Autenticação | scrypt, sessões opacas armazenadas por hash e cookies HttpOnly/SameSite, Secure em produção |
+| Validação | Zod, verificação de origem nas escritas e limitação de tentativas no banco |
+| Publicação | Vercel na equipe NatosTech e PostgreSQL no Neon pessoal de Robson Nonato |
+
+<a id="rodar-com-docker"></a>
+
+## 🚀 Rodar com Docker
+
+**Aplicação + PostgreSQL + preparação do banco + liquidação automática.**
 
 Requisito: Docker Desktop com containers Linux ou Docker Engine com Compose v2. Não é necessário instalar Node.js nem PostgreSQL no computador.
 
@@ -58,7 +125,10 @@ Os dados ficam no volume `dados-postgres`. **Não use `down -v` para uma parada 
 
 A imagem inclui Prisma CLI e `tsx` para executar migrations, seed e liquidação. Arquivos `.env`, dados locais e credenciais do host não entram na imagem.
 
-## Executar sem Docker
+## 🛠️ Instalação alternativa
+
+<details>
+<summary><strong>Executar sem Docker — ver detalhes</strong></summary>
 
 Requisitos: Node.js 24 e npm.
 
@@ -79,15 +149,7 @@ npm run dev
 
 Abra **http://localhost:4168**. Execute setup antes de iniciar o servidor; o PGlite em arquivo deve ter um único processo proprietário. Pare o servidor antes de reaplicar setup. PGlite não é usado na Vercel.
 
-### Contas de demonstração
-
-| Papel     | E-mail                    | Saldo inicial |
-| --------- | ------------------------- | ------------- |
-| Leiloeiro | `leiloeiro@arremata.test` | R$ 0          |
-| Licitante | `ana@arremata.test`       | R$ 5.000      |
-| Licitante | `bruno@arremata.test`     | R$ 5.000      |
-
-Na demonstração publicada, a senha das três contas é `Arremata-Demo-2026!` (contas sintéticas, sem dinheiro real). Em instalações próprias, a senha é `DEMO_PASSWORD` do primeiro setup. Reexecutar não redefine senhas nem repõe saldo existente. Informe a senha de demonstração ao avaliador junto à URL; não utilize credenciais pessoais.
+As contas locais são as mesmas listadas em [Acesso rápido](#contas-de-demonstracao). A senha é `DEMO_PASSWORD` do primeiro setup. O saldo inicial é R$ 5.000 para Ana e Bruno e R$ 0 para o leiloeiro. Reexecutar o setup não redefine senhas nem repõe saldo existente.
 
 O seed importa três obras reais: duas abertas e uma agendada. Não duplica lotes se já houver lote aberto. Se todos expiraram, cria novo conjunto com datas relativas à execução. A primeira importação depende da API; lotes existentes não dependem dela.
 
@@ -95,7 +157,9 @@ O seed importa três obras reais: duas abertas e uma agendada. Não duplica lote
 
 Defina `DATABASE_URL`, execute `npm run db:migrate` e depois `npm run db:setup` (seed). O modelo está em `prisma/schema.prisma`, e as migrations versionadas em `prisma/migrations`. `npm ci` gera o cliente Prisma; `npm run db:generate` regenera após mudanças. Em desenvolvimento PostgreSQL, use `npm run db:migrate:dev` para criar novas migrations. O seed não cria tabelas em PostgreSQL remoto. Use base exclusiva e usuário com permissão para criar tabelas/índices. Configure SSL na URL conforme o provedor, sem desabilitar validação de certificado.
 
-## Regras implementadas
+</details>
+
+## 📋 Regras implementadas
 
 - Vitrine: ao vivo, agendados e encerrados; cancelados ocultos; busca por obra/artista.
 - Leiloeiro busca API pública, publica lotes com início/fim, lance inicial/incremento e gerencia somente os próprios lotes. Não pode dar lances.
@@ -111,7 +175,10 @@ Defina `DATABASE_URL`, execute `npm run db:migrate` e depois `npm run db:setup` 
 - Meus arremates: participações/vitórias. Painel do leiloeiro: resultados e total recebido.
 - Auditoria/comprovante públicos com aliases, sem nomes/e-mails de licitantes.
 
-## Concorrência e encerramento
+## ⚙️ Concorrência e encerramento
+
+<details>
+<summary><strong>Concorrência e encerramento — ver detalhes</strong></summary>
 
 Operações de mercado usam transação PostgreSQL com `pg_advisory_xact_lock(215884)`, compartilhada entre instâncias Node.js. Isso protege também a mesma carteira em lotes diferentes. A serialização global prioriza simplicidade neste teste e limita escalabilidade. O adaptador PGlite usa fila por instância.
 
@@ -119,7 +186,12 @@ Operações de mercado usam transação PostgreSQL com `pg_advisory_xact_lock(21
 
 A publicação usa o plano Pro da NatosTech, com cron de um minuto habilitado. As requisições reais do agendador foram conferidas nos logs da Vercel. Em outra instalação, confirmar o suporte do plano; liquidação no próximo acesso não substitui o cron.
 
-## Auditoria e API externa
+</details>
+
+## 🛡️ Auditoria e integração com o museu
+
+<details>
+<summary><strong>Auditoria e API externa — ver detalhes</strong></summary>
 
 Cada lance contém HMAC-SHA256 dos seus dados e hash anterior. Checkpoint HMAC autentica metadados, estado, quantidade, último hash e comprovante. Detecta alteração/inserção/exclusão, inclusive da última linha. `AUDIT_SECRET` fica fora do banco. Não trocar a chave após criar lotes: invalida assinaturas existentes.
 
@@ -127,7 +199,12 @@ Limites: verificação confia no servidor/chave. Não protege contra quem contro
 
 Dados e JPEG da obra são copiados para PostgreSQL ao publicar. Vitrine, sala, auditoria e comprovante usam essa cópia. API indisponível afeta somente novas buscas/importações, com mensagem clara. Imagens são servidas por endpoint próprio com cache, fora do JSON de polling. Só imagens CC0 do host oficial do museu, limitadas a 3 MiB.
 
-## Vercel
+</details>
+
+## ☁️ Publicar na Vercel
+
+<details>
+<summary><strong>Vercel — ver detalhes</strong></summary>
 
 1. Criar PostgreSQL exclusivo, configurar `DATABASE_URL`, executar `npm run db:migrate` e depois `npm run db:setup`.
 2. Importar **NonattoDev/arremata-ae** na conta autorizada, framework Next.js; `npm ci` e `npm run build`.
@@ -137,7 +214,9 @@ Dados e JPEG da obra são copiados para PostgreSQL ao publicar. Vitrine, sala, a
 6. Testar dois logins, lances concorrentes, reserva/liberação, encerramento sem navegador, comprovante e auditoria em desktop/mobile.
 7. Enviar os links no formulário do teste com relato de IA. Submissão não automatizada.
 
-## Verificações
+</details>
+
+## ✅ Como verificar
 
 ```sh
 npm test
@@ -162,7 +241,9 @@ Testes de domínio executam SQL em PGlite e cobrem limites, papéis, saldo entre
 
 Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplicada**, defina `POSTGRES_TEST_URL` e execute `npx tsx --test tests/auction.test.ts`. A suíte cria dados e adultera históricos deliberadamente: nunca usar a base publicada. Para smoke HTTP fora do Docker, defina obrigatoriamente `SMOKE_BASE_URL` com o destino isolado e `DEMO_PASSWORD` com a senha das contas sintéticas e execute `npx tsx scripts/smoke.ts`. O smoke verifica CPF/nascimento antes de criar dados; contas antigas incompletas devem ser completadas pela interface. Ele adiciona R$ 10 à carteira de Ana, cria um lote, testa disputa/reserva, cancela duas vezes para conferir estorno idempotente e preservação da auditoria. O lote de teste permanece cancelado, sem reserva pendente. Não execute esse smoke na produção.
 
-## Organização e uso de IA
+<a id="organizacao-e-ia"></a>
+
+## 🗂️ Organização e uso de IA
 
 - `src/app`: rotas explícitas do App Router e composição de layout.
 - `src/funcionalidades`: telas separadas por funcionalidade.
@@ -179,6 +260,6 @@ Para reproduzir no PostgreSQL, use uma **base descartável com a migration aplic
 - `docs/REQUISITOS.md`: rastreabilidade do PDF.
 - `docs/CHECKLIST-DESAFIO.md`: checklist obrigatório/opcional com evidências e pendências de entrega.
 
-Desenvolvido com assistência do Codex para estrutura, código, testes, documentação e revisão. Foram conferidas regras contra o PDF, executadas verificações e corrigidos achados de revisão. Não se afirma revisão manual do candidato ainda não realizada: antes de enviar, Robson deve revisar/compreender a solução e ajustar o relato à participação real.
+O Codex teve participação ampla na estrutura, no código, nos testes, na documentação e na revisão. Robson definiu os fluxos, acompanhou o desenvolvimento, testou telas e solicitou correções nas regras e na interface. As verificações e seus limites estão registrados em [VALIDACAO.md](docs/VALIDACAO.md).
 
 Fontes técnicas: [Cleveland Open Access API](https://www.clevelandart.org/open-access-api), [Next.js Route Handlers](https://nextjs.org/docs/app/getting-started/route-handlers), [HeroUI 3](https://heroui.com/en/docs/react/getting-started/frameworks).
